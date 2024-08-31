@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:llearning/features/Auth/presentation/view/Loginview.dart';
 
 class OnboardingView extends ConsumerStatefulWidget {
   const OnboardingView({super.key});
@@ -104,6 +105,7 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
                 ElevatedButton.icon(
                   onPressed: () {
                     if (_currentPage == onboardingData.length - 1) {
+                      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>LoginView()));
                       // Navigate to the main screen or home screen
                     } else {
                       _pageController.nextPage(

@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:llearning/features/Auth/presentation/view/Loginview.dart';
 
+import '../../../../cores/shared_pref/app_shared_pref.dart';
 import 'OnboardingView.dart';
 
+final AppSharedPrefsProvider = Provider<AppSharedPrefs>((ref) {
+  return AppSharedPrefs();
+});
 class SplashView extends ConsumerStatefulWidget {
   const SplashView({super.key});
 
@@ -30,18 +35,41 @@ class _SplashViewState extends ConsumerState<SplashView>
     );
 
     _animationController.forward();
-    Future.delayed(const Duration(seconds: 3), () {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const OnboardingView()),
-      );
-    });
+
+    changescreen();
+
   }
 
   @override
   void dispose() {
     _animationController.dispose();
     super.dispose();
+  }
+  Future<void> changescreen() async {
+
+    final appSharedPrefs = ref.read(AppSharedPrefsProvider);
+
+
+
+    final result = await appSharedPrefs.getFirstTime();
+    result.fold(
+          (failure) {
+      },
+          (isFirstTime) {
+        // Default to true if isFirstTime is null (in case of uninitialized SharedPreferences)
+        final isFirstTimeBool = isFirstTime ?? true;
+        Future.delayed(const Duration(seconds: 3), () async{
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context){
+              return  isFirstTimeBool ? const OnboardingView() : LoginView();
+            }),
+          );
+
+        });
+      },
+    );
+    // }
   }
 
   @override

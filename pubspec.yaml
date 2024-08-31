@@ -47,7 +47,6 @@ dependencies:
   file_picker: ^8.0.6
   permission_handler: ^11.3.1
   hive_flutter: ^1.1.0
-  provider:
   json_annotation: ^4.9.0
   uuid: ^4.4.0
   all_sensors2: ^1.0.1
@@ -57,8 +56,6 @@ dependencies:
   awesome_dialog: ^3.2.1
   test_cov_console: ^0.2.2
   carousel_slider:
-  get:
-
   url_launcher: ^6.3.0
   flutter_pdfview: ^1.2.7
   cached_network_image: ^3.3.1
