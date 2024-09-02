@@ -114,7 +114,7 @@ class _SignupViewState extends ConsumerState<SignupView> {
       final viewModel = ref.read(authViewModelProvider.notifier);
 
       final result = await viewModel.createUser(user, _profileImage);
-
+      _showSuccessDialog();
       // result.fold(
       //       (failure) {
       //     ScaffoldMessenger.of(context).showSnackBar(

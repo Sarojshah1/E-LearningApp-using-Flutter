@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:llearning/features/Auth/presentation/view/Loginview.dart';
-
+import '../../../../cores/shared_pref/app_shared_pref.dart';
+final AppSharedPrefsProvider = Provider<AppSharedPrefs>((ref) {
+  return AppSharedPrefs();
+});
 class OnboardingView extends ConsumerStatefulWidget {
   const OnboardingView({super.key});
 
@@ -105,8 +108,9 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
                 ElevatedButton.icon(
                   onPressed: () {
                     if (_currentPage == onboardingData.length - 1) {
+                      AppSharedPrefs().setFirstTime(false);
                       Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>LoginView()));
-                      // Navigate to the main screen or home screen
+
                     } else {
                       _pageController.nextPage(
                         duration: const Duration(milliseconds: 300),

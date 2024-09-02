@@ -3,6 +3,9 @@ import 'dart:io';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:llearning/features/home/data/models/certificate_model.dart';
+import 'package:llearning/features/home/data/models/course_model.dart';
+import 'package:llearning/features/home/data/models/user_quiz_result_model.dart';
 import '../../domain/Entity/UserEntity.dart';
 
 part 'user_entity_model.g.dart';
@@ -17,12 +20,9 @@ class UserEntityModel extends Equatable {
   final String role;
   final String? profilePicture;
   final String bio;
-  final List<String> enrolledCourses;
-  final List<String> payments;
-  final List<String> blogPosts;
-  final List<String> quizResults;
-  final List<String> reviews;
-  final List<String> certificates;
+  final List<CourseModel> enrolledCourses;
+  final List<UserQuizResultModel> quizResults;
+  final List<CertificateModel> certificates;
 
   const UserEntityModel({
     required this.name,
@@ -32,10 +32,7 @@ class UserEntityModel extends Equatable {
    this.profilePicture,
     this.bio = '',
     this.enrolledCourses = const [],
-    this.payments = const [],
-    this.blogPosts = const [],
     this.quizResults = const [],
-    this.reviews = const [],
     this.certificates = const [],
   });
 
@@ -48,13 +45,28 @@ class UserEntityModel extends Equatable {
         bio = '',
 
         enrolledCourses = const [],
-        payments = const [],
-        blogPosts = const [],
         quizResults = const [],
-        reviews = const [],
         certificates = const [];
 
-  factory UserEntityModel.fromJson(Map<String, dynamic> json) => _$UserEntityModelFromJson(json);
+  factory UserEntityModel.fromJson(Map<String, dynamic> json) {
+    return UserEntityModel(
+      name: json['name'] as String? ?? '',
+      email: json['email'] as String? ?? '',
+      password: json['password'] as String? ?? '',
+      role: json['role'] as String? ?? '',
+      profilePicture: json['profile_picture'] as String?,
+      bio: json['bio'] as String? ?? '',
+      enrolledCourses: (json['enrolled_courses'] as List<dynamic>?)
+          ?.map((e) => CourseModel.fromJson(e as Map<String, dynamic>))
+          .toList() ?? [],
+      quizResults: (json['quiz_results'] as List<dynamic>?)
+          ?.map((e) => UserQuizResultModel.fromJson(e as Map<String, dynamic>))
+          .toList() ?? [],
+      certificates: (json['certificates'] as List<dynamic>?)
+          ?.map((e) => CertificateModel.fromJson(e as Map<String, dynamic>))
+          .toList() ?? [],
+    );
+  }
 
   Map<String, dynamic> toJson() => _$UserEntityModelToJson(this);
 
@@ -62,6 +74,9 @@ class UserEntityModel extends Equatable {
     return UserEntity(
        name: name,
       email: email, role: role, password: password, profilePicture:profilePicture ,
+      enrolledCourses: enrolledCourses,
+      quizResults: quizResults,
+      certificates: certificates,
       // Add other fields if necessary in your UserEntity class
     );
   }
@@ -72,7 +87,10 @@ class UserEntityModel extends Equatable {
       email: entity.email,
       password: entity.password,
       role: entity.role,
-      profilePicture: '', // Set this if it's available in UserEntity
+      profilePicture: entity.profilePicture,
+      certificates: entity.certificates,
+      quizResults: entity.quizResults,
+      enrolledCourses: entity.enrolledCourses
     );
   }
 
@@ -85,10 +103,8 @@ class UserEntityModel extends Equatable {
     profilePicture,
     bio,
     enrolledCourses,
-    payments,
-    blogPosts,
     quizResults,
-    reviews,
     certificates,
   ];
 }
+

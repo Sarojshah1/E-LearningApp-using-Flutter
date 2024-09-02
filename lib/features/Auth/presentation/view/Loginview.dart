@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:llearning/features/Auth/presentation/view/SignUpView.dart';
 
+import '../../../home/presentation/view/HomeView.dart';
+import '../viewModel/userViewModel.dart';
+
 class LoginView extends ConsumerStatefulWidget {
   @override
   _LoginViewState createState() => _LoginViewState();
@@ -18,6 +21,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
 
   @override
   Widget build(BuildContext context) {
+    final authViewModel = ref.watch(authViewModelProvider.notifier);
     return Scaffold(
       body: Container(
         color: Colors.white, // Simple white background
@@ -142,10 +146,26 @@ class _LoginViewState extends ConsumerState<LoginView> {
                     // Login Button with Arrow
                     Center(
                       child: ElevatedButton.icon(
-                        onPressed: () {
+                        onPressed: () async{
                           if (_formKey.currentState!.validate()) {
-                            print(_emailController.text);
-                            print(_passwordController.text);
+                            final email = _emailController.text;
+                            final password = _passwordController.text;
+
+                            await authViewModel.userLogin(email, password);
+
+                            if (ref.read(authViewModelProvider).error == null) {
+                              // Navigate to the next screen or show a success message
+                              print('Login successful');
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(builder: (context) => const HomeView()),
+                              );
+                              // Example: Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomePage()));
+                            } else {
+                              // Show error message
+                              print('Login failed: ${ref.read(authViewModelProvider).error}');
+                              // Example: Show a dialog or a snackbar with the error message
+                            }
                           }
                         },
                         icon: Text(

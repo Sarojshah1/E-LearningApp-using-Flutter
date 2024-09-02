@@ -11,14 +11,11 @@ UserEntityModel _$UserEntityModelFromJson(Map<String, dynamic> json) => UserEnti
   email: json['email'] as String,
   password: json['password'] as String,
   role: json['role'] as String,
-  profilePicture: json['profilePicture'] as String,
+  profilePicture: json['profile_picture'] as String?,
   bio: json['bio'] as String? ?? '',
-  enrolledCourses: (json['enrolledCourses'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
-  payments: (json['payments'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
-  blogPosts: (json['blogPosts'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
-  quizResults: (json['quizResults'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
-  reviews: (json['reviews'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
-  certificates: (json['certificates'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
+  enrolledCourses: (json['enrolled_courses'] as List<dynamic>?)?.map((e) => e as CourseModel).toList() ?? [],
+  quizResults: (json['quiz_results'] as List<dynamic>?)?.map((e) => e as UserQuizResultModel).toList() ?? [],
+  certificates: (json['certificates'] as List<dynamic>?)?.map((e) => e as CertificateModel).toList() ?? [],
 );
 
 Map<String, dynamic> _$UserEntityModelToJson(UserEntityModel instance) => <String, dynamic>{
@@ -29,9 +26,6 @@ Map<String, dynamic> _$UserEntityModelToJson(UserEntityModel instance) => <Strin
   'profilePicture': instance.profilePicture,
   'bio': instance.bio,
   'enrolledCourses': instance.enrolledCourses,
-  'payments': instance.payments,
-  'blogPosts': instance.blogPosts,
   'quizResults': instance.quizResults,
-  'reviews': instance.reviews,
   'certificates': instance.certificates,
 };

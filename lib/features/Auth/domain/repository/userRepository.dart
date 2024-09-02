@@ -11,5 +11,5 @@ abstract class UserRepository {
   Future<Either<Failure, bool>> changePassword(String oldPassword, String newPassword);
   Future<Either<Failure, bool>> updateUserDetails(UserEntity user);
   Future<Either<Failure, bool>> updateProfilePicture(File? profilePicture);
-
+  Future<Either<Failure,bool>> userLogin(  String email,  String password);
 }

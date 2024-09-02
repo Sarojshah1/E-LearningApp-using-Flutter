@@ -1,10 +1,11 @@
+import '../../data/model/UserModel.dart';
 import '../../domain/Entity/UserEntity.dart';
 
 class UserState {
   final bool isLoading;
   final String? error;
-  final List<UserEntity>? users;
-  final UserEntity? user;
+  final List<UserEntityModel>? users;
+  final UserEntityModel? user;
 
   UserState({
     required this.isLoading,
@@ -25,8 +26,8 @@ class UserState {
   UserState copyWith({
     bool? isLoading,
     String? error,
-    List<UserEntity>? users,
-    UserEntity? user,
+    List<UserEntityModel>? users,
+    UserEntityModel? user,
   }) {
     return UserState(
       isLoading: isLoading ?? this.isLoading,

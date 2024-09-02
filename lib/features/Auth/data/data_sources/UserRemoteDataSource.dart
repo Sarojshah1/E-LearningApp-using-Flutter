@@ -65,16 +65,16 @@ class UserRemoteDataSource {
   Future<Either<Failure, UserEntityModel>> getUsers() async {
     try {
       final token = await userSharedPrefs.getUserToken();
-      token.fold((l) => throw Failure(error: l.error), (r) => r);
+      final authtoken=token.fold((l) => throw Failure(error: l.error), (r) => r);
       final response = await dio.get(ApiEndpoints.profile,
           options: Options(
             headers: {
-              'authorization': 'Bearer $token',
+              'authorization': 'Bearer $authtoken',
             }));
       if (response.statusCode == 200) {
-
-        final UserEntityModel users = response.data;
-        return Right(users);
+        final userJson = response.data;
+        final UserEntityModel user = UserEntityModel.fromJson(userJson);
+        return Right(user);
       } else {
         return Left(
           Failure(
@@ -91,7 +91,7 @@ class UserRemoteDataSource {
   Future<Either<Failure, bool>> changePassword(String oldPassword, String newPassword) async {
     try {
       final token = await userSharedPrefs.getUserToken();
-      token.fold((l) => throw Failure(error: l.error), (r) => r);
+      final authtoken=token.fold((l) => throw Failure(error: l.error), (r) => r);
       final response = await dio.put(
         ApiEndpoints.changePassword,
         data: {
@@ -100,7 +100,7 @@ class UserRemoteDataSource {
         },
           options: Options(
               headers: {
-                'authorization': 'Bearer $token',
+                'authorization': 'Bearer $authtoken',
               })
       );
       if (response.statusCode == 200) {
@@ -119,7 +119,7 @@ class UserRemoteDataSource {
   Future<Either<Failure, bool>> updateUserDetails(UserEntity user) async {
     try {
       final token = await userSharedPrefs.getUserToken();
-      token.fold((l) => throw Failure(error: l.error), (r) => r);
+      final authtoken=token.fold((l) => throw Failure(error: l.error), (r) => r);
       final response = await dio.put(
         ApiEndpoints.updateDetails,
         data: {
@@ -129,7 +129,7 @@ class UserRemoteDataSource {
         },
           options: Options(
               headers: {
-                'authorization': 'Bearer $token',
+                'authorization': 'Bearer $authtoken',
               })
       );
       if (response.statusCode == 200) {
@@ -148,7 +148,7 @@ class UserRemoteDataSource {
   Future<Either<Failure, bool>> updateProfilePicture(File? profilePicture) async {
     try {
       final token = await userSharedPrefs.getUserToken();
-      token.fold((l) => throw Failure(error: l.error), (r) => r);
+     final authtoken= token.fold((l) => throw Failure(error: l.error), (r) => r);
       final formData = FormData.fromMap({
         'profile_picture': await MultipartFile.fromFile(
           profilePicture!.path,
@@ -161,7 +161,7 @@ class UserRemoteDataSource {
         data: formData,
           options: Options(
               headers: {
-                'authorization': 'Bearer $token',
+                'authorization': 'Bearer $authtoken',
               })
       );
 
@@ -177,6 +177,30 @@ class UserRemoteDataSource {
     } on DioException catch (e) {
       return Left(Failure(error: e.message.toString()));
     }
+  }
+
+  Future<Either<Failure,bool>> userLogin( {required String email, required String password}) async{
+    try{
+      Response response =await dio.post(ApiEndpoints.login,
+      data: {
+        'email':email,
+        'password':password
+      }
+      );
+      if(response.statusCode==200){
+        final token = response.data['token'];
+        final role =response.data['role'];
+        final id=response.data['id'];
+        await userSharedPrefs.setUserToken(token);
+        await userSharedPrefs.setUserRole(role);
+        await userSharedPrefs.setUserId(id);
+
+      }
+      return const Right(true);
+    }on DioException catch(e){
+      return Left(Failure(error: e.error.toString()));
+    }
+
   }
 
 }

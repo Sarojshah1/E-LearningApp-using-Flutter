@@ -31,4 +31,9 @@ class userUsecase{
   Future<Either<Failure, bool>> updateProfilePicture(File? profilePicture)async{
     return await userRepository.updateProfilePicture(profilePicture);
   }
+
+  Future<Either<Failure,bool>> userLogin(  String email,  String password) async{
+    return await userRepository.userLogin(email, password);
+
+  }
 }

@@ -8,7 +8,6 @@ import '../state/userState.dart';
 
 final authViewModelProvider = StateNotifierProvider<UserViewModel, UserState>(
       (ref) => UserViewModel(
-    // ref.read(loginViewNavigatorProvider),
     ref.read(userUsecaseProvider),
   ),
 );
@@ -31,7 +30,7 @@ class UserViewModel extends StateNotifier<UserState>{
     final result = await userUseCase.getUsers();
     result.fold(
           (failure) => state = UserState(isLoading: false, error: failure.error),
-          (users) => state = UserState(isLoading: false,user: users),
+          (user) => state = UserState(isLoading: false,user: user),
     );
   }
 
@@ -60,6 +59,17 @@ class UserViewModel extends StateNotifier<UserState>{
           (failure) => state = state.copyWith(isLoading: false, error: failure.error),
           (success) => state = state.copyWith(isLoading: false),
     );
+  }
+  Future<void> userLogin (String email,String password)async{
+    state=state.copyWith(isLoading: true);
+    final result =await userUseCase.userLogin(email, password);
+    result.fold((failure){
+      state = state.copyWith(isLoading: false, error: failure.error);
+
+    }, (success){
+      state = state.copyWith(isLoading: false, error: null);
+    });
+
   }
 
 }

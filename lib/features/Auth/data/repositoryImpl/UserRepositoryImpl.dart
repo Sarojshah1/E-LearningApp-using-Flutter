@@ -49,4 +49,10 @@ class UserRepositoryImpl implements UserRepository {
   Future<Either<Failure, bool>> updateProfilePicture(File? profilePicture) async{
    return await remoteDataSource.updateProfilePicture(profilePicture);
   }
+  @override
+  Future<Either<Failure, bool>> userLogin(String email, String password) async{
+    return await remoteDataSource.userLogin(email: email, password: password);
+
+
+  }
 }

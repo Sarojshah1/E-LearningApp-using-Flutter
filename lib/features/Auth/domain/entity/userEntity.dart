@@ -1,5 +1,9 @@
 import 'package:equatable/equatable.dart';
+import 'package:llearning/features/home/data/models/certificate_model.dart';
 import 'dart:io';
+
+import 'package:llearning/features/home/data/models/course_model.dart';
+import 'package:llearning/features/home/data/models/user_quiz_result_model.dart';
 class UserEntity extends Equatable {
   final String name;
   final String email;
@@ -7,12 +11,9 @@ class UserEntity extends Equatable {
   final String role;
   final String? profilePicture;
   final String bio;
-  final List<String> enrolledCourses;
-  final List<String> payments;
-  final List<String> blogPosts;
-  final List<String> quizResults;
-  final List<String> reviews;
-  final List<String> certificates;
+  final List<CourseModel> enrolledCourses;
+  final List<UserQuizResultModel> quizResults;
+  final List<CertificateModel> certificates;
 
   const UserEntity({
     required this.name,
@@ -22,10 +23,7 @@ class UserEntity extends Equatable {
    this.profilePicture,
     this.bio = '',
     this.enrolledCourses = const [],
-    this.payments = const [],
-    this.blogPosts = const [],
     this.quizResults = const [],
-    this.reviews = const [],
     this.certificates = const [],
   });
 
@@ -38,10 +36,7 @@ class UserEntity extends Equatable {
     profilePicture,
     bio,
     enrolledCourses,
-    payments,
-    blogPosts,
     quizResults,
-    reviews,
     certificates,
   ];
 }

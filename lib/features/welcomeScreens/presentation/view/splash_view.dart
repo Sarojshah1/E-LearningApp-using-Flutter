@@ -2,11 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:llearning/features/Auth/presentation/view/Loginview.dart';
 
+import '../../../../cores/failure/failure.dart';
 import '../../../../cores/shared_pref/app_shared_pref.dart';
+import '../../../../cores/shared_pref/user_shared_pref.dart';
+import '../../../home/presentation/view/HomeView.dart';
 import 'OnboardingView.dart';
 
 final AppSharedPrefsProvider = Provider<AppSharedPrefs>((ref) {
   return AppSharedPrefs();
+});
+final userSharedPrefsProvider = Provider<UserSharedPrefs>((ref) {
+  return UserSharedPrefs();
 });
 class SplashView extends ConsumerStatefulWidget {
   const SplashView({super.key});
@@ -46,30 +52,41 @@ class _SplashViewState extends ConsumerState<SplashView>
     super.dispose();
   }
   Future<void> changescreen() async {
-
     final appSharedPrefs = ref.read(AppSharedPrefsProvider);
-
-
+    final userSharedPrefs = ref.read(userSharedPrefsProvider);
 
     final result = await appSharedPrefs.getFirstTime();
-    result.fold(
-          (failure) {
-      },
-          (isFirstTime) {
-        // Default to true if isFirstTime is null (in case of uninitialized SharedPreferences)
-        final isFirstTimeBool = isFirstTime ?? true;
-        Future.delayed(const Duration(seconds: 3), () async{
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context){
-              return  isFirstTimeBool ? const OnboardingView() : LoginView();
-            }),
-          );
+    final token = await userSharedPrefs.getUserToken();
+    final authtoken=token.fold((l) => throw Failure(error: l.error), (r) => r);
 
-        });
-      },
-    );
-    // }
+    Future.delayed(const Duration(seconds: 3), () async {
+      if (authtoken != null) {
+        print(token);
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeView()),
+        );
+      } else {
+        result.fold(
+              (failure) {
+            // Handle failure case here if needed
+          },
+              (isFirstTime) {
+            // Default to true if isFirstTime is null
+            final isFirstTimeBool = isFirstTime ?? true;
+
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) {
+                return isFirstTimeBool
+                    ? const OnboardingView()
+                    :  LoginView();
+              }),
+            );
+          },
+        );
+      }
+    });
   }
 
   @override
