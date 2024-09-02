@@ -17,5 +17,12 @@ class ApiEndpoints {
   static const String changePassword = "$baseUrl/user/change-password";
   static const String updateDetails = "$baseUrl/user/update-details";
   static const String updateProfilePicture = "$baseUrl/user/update-profile-picture";
+//   course routes
+static const String getCourses="$baseUrl/courses/pagination";
+// reviews
+  static const String addReviews="$baseUrl/review/reviews";
+  static String getReviewUrl(String courseId) {
+    return "$baseUrl/review/reviews/course/$courseId";
+  }
 
 }

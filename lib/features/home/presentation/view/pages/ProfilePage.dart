@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:llearning/features/Courses/domain/usecases/course_usecase.dart';
 import 'package:llearning/features/profile/presentation/view/CertificatesPage.dart';
 import 'package:llearning/features/profile/presentation/view/QuizResultsPage.dart';
 
