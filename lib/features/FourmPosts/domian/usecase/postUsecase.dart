@@ -4,6 +4,7 @@ import 'package:llearning/features/FourmPosts/data/repositoryImpl/post_Repositor
 import 'package:llearning/features/FourmPosts/domian/repository/postRepository.dart';
 
 import '../../../../cores/failure/failure.dart';
+import '../../data/model/ForumPostModel.dart';
 final postUsecaseProvider =Provider.autoDispose<PostUseCase>((ref){
   return PostUseCase(repository: ref.read(postRepositoryImplProvider));
 });
@@ -13,5 +14,9 @@ class PostUseCase{
   Future<Either<Failure,bool>> createPost(String title,String content,List<String> tags)async{
     return await repository.createPost(title, content, tags);
     
+  }
+  Future<Either<Failure,List<ForumPostModel>>> getPost()async{
+    return await repository.getPost();
+
   }
 }

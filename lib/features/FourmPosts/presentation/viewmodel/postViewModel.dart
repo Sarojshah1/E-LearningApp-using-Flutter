@@ -16,5 +16,12 @@ class PostViewModel extends StateNotifier<ForumPostState>{
     result.fold((failure)=>state=state.copyWith(isLoading: false,error: failure.error),
         (success)=>state=state.copyWith(isLoading: false));
   }
+  Future<void> getPost()async{
+    state = state.copyWith(isLoading: true);
+    final result=await useCase.getPost();
+    result.fold((failure)=>state=state.copyWith(isLoading: false,error: failure.error),
+        (posts)=>state=state.copyWith(isLoading: false,forumPosts: posts));
+
+  }
 
 }

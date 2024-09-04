@@ -3,7 +3,7 @@ import 'package:llearning/features/Courses/data/model/UserEntityModelforCourse.d
 
 class CommentReply extends Equatable {
   final String id;
-  final String userId;
+  final UserModel userId;
   final String content;
   final DateTime createdAt;
 
@@ -20,7 +20,7 @@ class CommentReply extends Equatable {
 
 class Comment extends Equatable {
   final String id;
-  final String userId;
+  final UserModel userId;
   final String content;
   final DateTime createdAt;
   final List<CommentReply> replies;

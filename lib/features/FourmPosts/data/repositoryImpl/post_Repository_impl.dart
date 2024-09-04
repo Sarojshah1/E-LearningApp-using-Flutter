@@ -5,6 +5,7 @@ import 'package:llearning/features/FourmPosts/domian/repository/postRepository.d
 
 import '../../../../cores/common/internet_connectivity.dart';
 import '../../../../cores/failure/failure.dart';
+import '../model/ForumPostModel.dart';
 
 final postRepositoryImplProvider=Provider<PostRepository>(
     (ref){
@@ -26,5 +27,9 @@ class PostRepositoryImpl extends PostRepository{
   @override
   Future<Either<Failure, bool>> createPost(String title, String content, List<String> tags)async {
     return await dataSource.createPost(title, content, tags);
+  }
+  @override
+  Future<Either<Failure, List<ForumPostModel>>> getPost()async {
+    return await dataSource.getPost();
   }
 }

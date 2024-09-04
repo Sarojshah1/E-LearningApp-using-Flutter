@@ -1,49 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:llearning/features/FourmPosts/data/model/ForumPostModel.dart';
 import 'package:llearning/features/FourmPosts/presentation/view/CreatePostPage.dart';
-
-// Define your data models
-class Post {
-  final String title;
-  final String content;
-  final List<String> tags;
-  final int likes;
-  final List<Comment> comments;
-  final String posterName;
-  final String posterProfileUrl;
-
-  Post({
-    required this.title,
-    required this.content,
-    required this.tags,
-    required this.likes,
-    required this.comments,
-    required this.posterName,
-    required this.posterProfileUrl,
-  });
-}
-
-class Comment {
-  final String userName;
-  final String comment;
-  final List<Reply> replies;
-
-  Comment({
-    required this.userName,
-    required this.comment,
-    required this.replies,
-  });
-}
-
-class Reply {
-  final String userName;
-  final String reply;
-
-  Reply({
-    required this.userName,
-    required this.reply,
-  });
-}
+import 'package:llearning/features/FourmPosts/presentation/viewmodel/postViewModel.dart';
 
 class ForumPostPage extends ConsumerStatefulWidget {
   @override
@@ -51,31 +10,13 @@ class ForumPostPage extends ConsumerStatefulWidget {
 }
 
 class _ForumPostPageState extends ConsumerState<ForumPostPage> {
-  final List<Post> posts = List.generate(
-    10,
-        (index) => Post(
-      title: 'Post Title $index',
-      content: 'This is the content of post number $index. It contains interesting information about Flutter development and other related topics.',
-      tags: ['Tag${index % 3}', 'Tag${(index + 1) % 3}', 'Tag${(index + 2) % 3}'],
-      likes: (index + 1) * 10,
-      comments: List.generate(
-        (index % 3) + 1,
-            (commentIndex) => Comment(
-          userName: 'User${index * 10 + commentIndex}',
-          comment: 'This is a comment number $commentIndex on post number $index.',
-          replies: List.generate(
-            (commentIndex % 2) + 1,
-                (replyIndex) => Reply(
-              userName: 'ReplyUser${index * 10 + commentIndex * 10 + replyIndex}',
-              reply: 'This is a reply number $replyIndex to comment number $commentIndex on post number $index.',
-            ),
-          ),
-        ),
-      ),
-      posterName: 'Poster $index',
-      posterProfileUrl: 'https://randomuser.me/api/portraits/men/${index % 10}.jpg',
-    ),
-  );
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      ref.read(postViewModelProvider.notifier).getPost();
+    });
+  }
 
   void _createPost() {
     Navigator.push(context, MaterialPageRoute(builder: (context) => CreatePostPage()));
@@ -83,6 +24,9 @@ class _ForumPostPageState extends ConsumerState<ForumPostPage> {
 
   @override
   Widget build(BuildContext context) {
+    final postState = ref.watch(postViewModelProvider);
+    final posts = postState.forumPosts;
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Forum Posts'),
@@ -103,7 +47,7 @@ class _ForumPostPageState extends ConsumerState<ForumPostPage> {
 }
 
 class PostWidget extends ConsumerStatefulWidget {
-  final Post post;
+  final ForumPostModel post;
 
   PostWidget({required this.post});
 
@@ -116,28 +60,23 @@ class _PostWidgetState extends ConsumerState<PostWidget> {
   Map<int, bool> _showReplies = {};
   Map<int, TextEditingController> _replyControllers = {};
   bool _isLiked = false;
+  final TextEditingController _commentController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _showReplies = Map.fromIterable(
-      List.generate(widget.post.comments.length, (index) => index),
-      key: (index) => index,
-      value: (index) => false,
-    );
-
-    // Initialize controllers for each comment's replies
-    _replyControllers = Map.fromIterable(
-      List.generate(widget.post.comments.length, (index) => index),
-      key: (index) => index,
-      value: (index) => TextEditingController(),
-    );
+    _showReplies = {
+      for (int i = 0; i < widget.post.comments.length; i++) i: false,
+    };
+    _replyControllers = {
+      for (int i = 0; i < widget.post.comments.length; i++) i: TextEditingController(),
+    };
   }
 
   @override
   void dispose() {
-    // Dispose of the controllers to avoid memory leaks
-    _replyControllers.forEach((key, controller) => controller.dispose());
+    _replyControllers.forEach((_, controller) => controller.dispose());
+    _commentController.dispose();
     super.dispose();
   }
 
@@ -150,11 +89,7 @@ class _PostWidgetState extends ConsumerState<PostWidget> {
   void _addComment() {
     if (_commentController.text.isNotEmpty) {
       setState(() {
-        widget.post.comments.add(Comment(
-          userName: 'NewUser',
-          comment: _commentController.text,
-          replies: [],
-        ));
+        // Implement adding a comment here
         _commentController.clear();
       });
     }
@@ -164,10 +99,7 @@ class _PostWidgetState extends ConsumerState<PostWidget> {
     final controller = _replyControllers[commentIndex];
     if (controller != null && controller.text.isNotEmpty) {
       setState(() {
-        widget.post.comments[commentIndex].replies.add(Reply(
-          userName: 'NewUser',
-          reply: controller.text,
-        ));
+        // Implement adding a reply here
         controller.clear();
       });
     }
@@ -176,11 +108,8 @@ class _PostWidgetState extends ConsumerState<PostWidget> {
   void _likePost() {
     setState(() {
       _isLiked = !_isLiked;
-      print(_isLiked ? 'Liked' : 'Unliked');
     });
   }
-
-  final TextEditingController _commentController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -199,13 +128,13 @@ class _PostWidgetState extends ConsumerState<PostWidget> {
             Row(
               children: [
                 CircleAvatar(
-                  backgroundImage: NetworkImage(widget.post.posterProfileUrl),
+                  backgroundImage: NetworkImage("http://10.0.2.2:3000/profile/${widget.post.userId.profilePicture}"),
                   radius: 24.0,
                 ),
                 SizedBox(width: 8.0),
                 Expanded(
                   child: Text(
-                    widget.post.posterName,
+                    widget.post.userId.name,
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
@@ -243,16 +172,14 @@ class _PostWidgetState extends ConsumerState<PostWidget> {
             // Tags
             Wrap(
               spacing: 8.0,
-              children: widget.post.tags
-                  .map((tag) => Chip(
+              children: widget.post.tags.map((tag) => Chip(
                 label: Text(tag),
                 backgroundColor: Colors.blueAccent.withOpacity(0.1),
                 labelStyle: TextStyle(color: Colors.blueAccent),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20.0),
                 ),
-              ))
-                  .toList(),
+              )).toList(),
             ),
             SizedBox(height: 12.0),
             // Likes and Comments
@@ -266,7 +193,7 @@ class _PostWidgetState extends ConsumerState<PostWidget> {
                   onPressed: _likePost,
                 ),
                 SizedBox(width: 4.0),
-                Text('${widget.post.likes}'),
+                Text('${widget.post.likes.length}'),
                 SizedBox(width: 16.0),
                 GestureDetector(
                   onTap: () {
@@ -294,100 +221,98 @@ class _PostWidgetState extends ConsumerState<PostWidget> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: widget.post.comments.asMap().entries.map((entry) {
                   int index = entry.key;
-                  Comment comment = entry.value;
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(height: 8.0),
-                      Container(
-                        padding: EdgeInsets.all(12.0),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[100],
-                          borderRadius: BorderRadius.circular(8.0),
-                          border: Border.all(color: Colors.grey[300]!),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                CircleAvatar(
-                                  backgroundColor: Colors.grey[300],
-                                  child: Text(comment.userName[0], style: TextStyle(color: Colors.white)),
-                                ),
-                                SizedBox(width: 8.0),
-                                Expanded(
-                                  child: Text(
-                                    '${comment.userName}: ${comment.comment}',
-                                    style: TextStyle(fontSize: 14),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 6.0),
-                            GestureDetector(
-                              onTap: () => _toggleReplies(index),
-                              child: Text(
-                                _showReplies[index]! ? 'Hide Replies' : 'Show Replies (${comment.replies.length})',
-                                style: TextStyle(color: Colors.blue, fontSize: 14),
+                  final comment = entry.value;
+
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 8.0),
+                    child: Container(
+                      padding: EdgeInsets.all(12.0),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[100],
+                        borderRadius: BorderRadius.circular(8.0),
+                        border: Border.all(color: Colors.grey[300]!),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              CircleAvatar(
+                                backgroundImage: NetworkImage("http://10.0.2.2:3000/profile/${comment.userId.profilePicture}"),
+                                radius: 24.0,
                               ),
+                              SizedBox(width: 8.0),
+                              Expanded(
+                                child: Text(
+                                  '${comment.userId.name}: ${comment.content}',
+                                  style: TextStyle(fontSize: 14),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 6.0),
+                          GestureDetector(
+                            onTap: () => _toggleReplies(index),
+                            child: Text(
+                              _showReplies[index]! ? 'Hide Replies' : 'Show Replies (${comment.replies.length})',
+                              style: TextStyle(color: Colors.blue, fontSize: 14),
                             ),
-                            if (_showReplies[index]!)
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  ...comment.replies.map((reply) => Padding(
-                                    padding: const EdgeInsets.only(left: 32.0, top: 4.0),
-                                    child: Row(
-                                      children: [
-                                        CircleAvatar(
-                                          backgroundColor: Colors.grey[300],
-                                          child: Text(reply.userName[0], style: TextStyle(color: Colors.white)),
-                                        ),
-                                        SizedBox(width: 8.0),
-                                        Expanded(
-                                          child: Text(
-                                            '${reply.userName}: ${reply.reply}',
-                                            style: TextStyle(fontSize: 14),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  )),
-                                  SizedBox(height: 8.0),
-                                  Row(
+                          ),
+                          if (_showReplies[index]!)
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: comment.replies.map((reply) {
+                                return Padding(
+                                  padding: const EdgeInsets.only(left: 32.0, top: 4.0),
+                                  child: Row(
                                     children: [
-                                      Expanded(
-                                        child: TextField(
-                                          controller: _replyControllers[index],
-                                          decoration: InputDecoration(
-                                            hintText: 'Write a reply...',
-                                            border: OutlineInputBorder(
-                                              borderRadius: BorderRadius.circular(8.0),
-                                            ),
-                                          ),
-                                        ),
+                                      CircleAvatar(
+                                        backgroundImage: NetworkImage("http://10.0.2.2:3000/profile/${reply.userId.profilePicture}"),
+                                        radius: 24.0,
                                       ),
                                       SizedBox(width: 8.0),
-                                      ElevatedButton(
-                                        onPressed: () => _addReply(index),
-                                        style: ElevatedButton.styleFrom(
-                                         backgroundColor: Colors.blueAccent, // Button color
-                                          foregroundColor: Colors.white,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(8.0),
-                                          ),
+                                      Expanded(
+                                        child: Text(
+                                          '${reply.userId.name}: ${reply.content}',
+                                          style: TextStyle(fontSize: 14),
                                         ),
-                                        child: Text('Reply'),
                                       ),
                                     ],
                                   ),
-                                ],
+                                );
+                              }).toList(),
+                            ),
+                          SizedBox(height: 8.0),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: TextField(
+                                  controller: _replyControllers[index],
+                                  decoration: InputDecoration(
+                                    hintText: 'Write a reply...',
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8.0),
+                                    ),
+                                  ),
+                                ),
                               ),
-                          ],
-                        ),
+                              SizedBox(width: 8.0),
+                              ElevatedButton(
+                                onPressed: () => _addReply(index),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.blueAccent,
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8.0),
+                                  ),
+                                ),
+                                child: Text('Reply'),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   );
                 }).toList(),
               ),
@@ -411,7 +336,7 @@ class _PostWidgetState extends ConsumerState<PostWidget> {
                 ElevatedButton(
                   onPressed: _addComment,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blueAccent, // Button color
+                    backgroundColor: Colors.blueAccent,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8.0),

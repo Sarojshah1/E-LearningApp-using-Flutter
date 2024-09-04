@@ -9,7 +9,7 @@ part of 'ForumPostModel.dart';
 CommentReplyModel _$CommentReplyModelFromJson(Map<String, dynamic> json) =>
     CommentReplyModel(
       id: json['_id'] as String,
-      userId: json['user_id'] as String,
+      userId: UserModel.fromJson(json['user_id']as Map<String, dynamic>),
       content: json['content'] as String,
       createdAt: DateTime.parse(json['created_at'] as String),
     );
@@ -24,7 +24,7 @@ Map<String, dynamic> _$CommentReplyModelToJson(CommentReplyModel instance) =>
 
 CommentModel _$CommentModelFromJson(Map<String, dynamic> json) => CommentModel(
   id: json['_id'] as String,
-  userId: json['user_id'] as String,
+  userId: UserModel.fromJson(json['user_id'] as Map<String, dynamic>),
   content: json['content'] as String,
   createdAt: DateTime.parse(json['created_at'] as String),
   replies: (json['replies'] as List<dynamic>)

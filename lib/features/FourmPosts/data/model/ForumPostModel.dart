@@ -4,16 +4,18 @@ import 'package:equatable/equatable.dart';
 import '../../../Courses/data/model/UserEntityModelforCourse.dart';
 import '../../domian/entity/ForumPostEntity.dart';
 
-
-part 'forum_post_model.g.dart'; // This file will be generated
+part 'forum_post_model.g.dart'; // Make sure this is correct
 
 @JsonSerializable()
 class CommentReplyModel extends Equatable {
-  @JsonKey(name: '_id')
+  @JsonKey(name: '_id') // Assuming your backend uses '_id'
   final String id;
+
   @JsonKey(name: 'user_id')
-  final String userId;
+  final UserModel userId;
+
   final String content;
+
   @JsonKey(name: 'created_at')
   final DateTime createdAt;
 
@@ -24,9 +26,13 @@ class CommentReplyModel extends Equatable {
     required this.createdAt,
   });
 
+  // Factory method for creating a CommentReplyModel from JSON
   factory CommentReplyModel.fromJson(Map<String, dynamic> json) => _$CommentReplyModelFromJson(json);
+
+  // Method for converting the CommentReplyModel to JSON
   Map<String, dynamic> toJson() => _$CommentReplyModelToJson(this);
 
+  // Method to convert model to entity
   CommentReply toEntity() {
     return CommentReply(
       id: id,
@@ -36,6 +42,7 @@ class CommentReplyModel extends Equatable {
     );
   }
 
+  // Method to create a model from entity
   static CommentReplyModel fromEntity(CommentReply entity) {
     return CommentReplyModel(
       id: entity.id,
@@ -53,11 +60,15 @@ class CommentReplyModel extends Equatable {
 class CommentModel extends Equatable {
   @JsonKey(name: '_id')
   final String id;
+
   @JsonKey(name: 'user_id')
-  final String userId;
+  final UserModel userId;
+
   final String content;
+
   @JsonKey(name: 'created_at')
   final DateTime createdAt;
+
   final List<CommentReplyModel> replies;
 
   const CommentModel({
@@ -99,16 +110,24 @@ class CommentModel extends Equatable {
 class ForumPostModel extends Equatable {
   @JsonKey(name: '_id')
   final String id;
+
   @JsonKey(name: 'user_id')
   final UserModel userId;
+
   final String title;
+
   final String content;
+
   @JsonKey(name: 'created_at')
   final DateTime createdAt;
+
   @JsonKey(name: 'updated_at')
   final DateTime updatedAt;
+
   final List<String> tags;
+
   final List<String> likes;
+
   final List<CommentModel> comments;
 
   const ForumPostModel({
