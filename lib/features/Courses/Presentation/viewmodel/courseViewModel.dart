@@ -43,4 +43,12 @@ class CourseViewModel extends StateNotifier<CourseState> {
     state = CourseState.initial();
     await getCourses();
   }
+
+  Future<void> getcourceById(String courseId)async{
+    state = state.copyWith(isLoading: true);
+    final result=await courseUseCase.getCoursesById(courseId);
+    result.fold((failure)=>state=state.copyWith(isLoading: false,error: failure.error),
+        (course)=>state=state.copyWith(isLoading: false,course: course));
+
+  }
 }

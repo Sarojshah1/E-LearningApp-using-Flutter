@@ -1,6 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:llearning/features/Auth/data/model/UserModel.dart';
 import 'package:llearning/features/home/data/models/CategoryEntityModel.dart';
+import 'package:llearning/features/home/data/models/QuizModel.dart';
+import 'package:llearning/features/home/data/models/lesson_model.dart';
 
 import '../../data/model/UserEntityModelforCourse.dart';
 
@@ -15,8 +17,8 @@ class CourseEntity extends Equatable {
   final String level;
   final String thumbnail;
   final DateTime createdAt;
-  final List<String> lessons; // List of ObjectId references
-  final List<String> quizzes; // List of ObjectId references
+  final List<LessonModel> lessons; // List of ObjectId references
+  final List<QuizModel> quizzes; // List of ObjectId references
   final List<String> reviews; // List of ObjectId references
   final List<String> certificates; // List of ObjectId references
 

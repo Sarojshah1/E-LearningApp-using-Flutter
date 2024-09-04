@@ -1,13 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:equatable/equatable.dart';
-import 'package:llearning/features/Auth/data/model/UserModel.dart';
-import 'package:llearning/features/home/data/models/CategoryEntityModel.dart';
-import 'package:llearning/features/home/data/models/QuizModel.dart';
-import 'package:llearning/features/home/data/models/certificate_model.dart';
-import 'package:llearning/features/home/data/models/lesson_model.dart';
-import 'package:llearning/features/home/data/models/review_model.dart';
-import 'package:llearning/features/home/domain/Entity/CategoryEntity.dart';
-import 'package:llearning/features/home/domain/entity/LessonEntity.dart';
 
 import '../../domain/entity/course_entity.dart';
 

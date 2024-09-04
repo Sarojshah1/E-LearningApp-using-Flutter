@@ -17,8 +17,10 @@ CourseModel _$CourseModelFromJson(Map<String, dynamic> json) => CourseModel(
   level: json['level'] as String? ?? 'beginner',
   thumbnail: json['thumbnail'] as String,
   createdAt: DateTime.parse(json['created_at'] as String),
-  lessons: (json['lessons'] as List<dynamic>).map((e) => e as String).toList(),
-  quizzes: (json['quizzes'] as List<dynamic>).map((e) => e as String).toList(),
+  lessons: (json['lessons'] as List<dynamic>)
+      .map((e) => LessonModel.fromJson(e as Map<String, dynamic>))
+      .toList(),
+  quizzes: (json['quizzes'] as List<dynamic>).map((e) => QuizModel.fromJson(e as Map<String, dynamic>)).toList(),
   reviews: (json['reviews'] as List<dynamic>).map((e) => e as String).toList(),
   certificates: (json['certificates'] as List<dynamic>).map((e) => e as String).toList(),
 );

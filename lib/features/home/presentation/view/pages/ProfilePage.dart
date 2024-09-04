@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:llearning/features/Courses/domain/usecases/course_usecase.dart';
+import 'package:llearning/features/Mylearnings/presentation/view/MyLearningPage.dart';
 import 'package:llearning/features/profile/presentation/view/CertificatesPage.dart';
 import 'package:llearning/features/profile/presentation/view/QuizResultsPage.dart';
 
@@ -204,6 +205,15 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     icon: Icons.card_membership,
                     onTap: () {
                       Navigator.push(context, MaterialPageRoute(builder: (context)=>CertificatesPage(certificates: userdetail.certificates)));
+                    },
+                    fontSize: fontSizeSubtitle,
+                    iconSize: iconSize,
+                  ),
+                  ProfileSection(
+                    title: 'My Learnings',
+                    icon: Icons.school_rounded,
+                    onTap: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context)=>MyLearningPage()));
                     },
                     fontSize: fontSizeSubtitle,
                     iconSize: iconSize,

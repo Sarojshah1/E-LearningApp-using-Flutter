@@ -23,7 +23,16 @@ class LessonModel extends Equatable {
     this.order = 0,
   });
 
-  factory LessonModel.fromJson(Map<String, dynamic> json) => _$LessonModelFromJson(json);
+  factory LessonModel.fromJson(Map<String, dynamic> json) {
+    return LessonModel(
+      id: json['_id'] as String? ?? '', // Provide default value if null
+      courseId: json['course_id'] as String? ?? '', // Provide default value if null
+      title: json['title'] as String? ?? '', // Provide default value if null
+      content: json['content'] as String? ?? '', // Provide default value if null
+      videoUrl: json['video_url'] as String?, // Nullable field
+      order: json['order'] as int? ?? 0, // Provide default value if null
+    );
+  }
 
   Map<String, dynamic> toJson() => _$LessonModelToJson(this);
 

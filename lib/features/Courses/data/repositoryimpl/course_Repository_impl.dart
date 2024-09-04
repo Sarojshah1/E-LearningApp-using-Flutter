@@ -26,4 +26,8 @@ class CourseRepositoryImpl extends CourseRepository{
   Future<Either<Failure, List<CourseModel>>> getCourses({required int page, required int limit}) async{
     return await remoteDataSource.getCourses(page: page, limit: limit);
   }
+  @override
+  Future<Either<Failure, CourseModel>> getCoursesById(String courseId) async{
+    return await remoteDataSource.getCoursesById(courseId);
+  }
 }

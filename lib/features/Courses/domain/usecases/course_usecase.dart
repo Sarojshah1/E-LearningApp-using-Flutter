@@ -16,5 +16,8 @@ class CourseUseCase{
   Future<Either<Failure, List<CourseModel>>> getCourses({required int page, required int limit}) async{
     return courseRepository.getCourses(page: page, limit: limit);
   }
+  Future<Either<Failure, CourseModel>> getCoursesById(String courseId)async{
+    return await courseRepository.getCoursesById(courseId);
+  }
 
 }

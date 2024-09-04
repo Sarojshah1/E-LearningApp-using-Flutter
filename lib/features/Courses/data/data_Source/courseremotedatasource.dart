@@ -61,4 +61,34 @@ class CourseRemoteDataSource {
       return left(Failure(error: e.message.toString()));
     }
   }
+  Future<Either<Failure, CourseModel>> getCoursesById(String courseId) async {
+    try {
+      final token = await userSharedPrefs.getUserToken();
+      final authToken = token.fold(
+            (l) => throw Failure(error: l.error),
+            (r) => r,
+      );
+
+      // Use the token in the request header if needed
+      Response response = await dio.get(
+        ApiEndpoints.getCourseUrl(courseId),
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $authToken',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        final CourseJson = response.data;
+        final CourseModel courses =CourseModel.fromJson(CourseJson);
+
+        return right(courses);
+      } else {
+        return left(Failure(error: "Failed to load courses"));
+      }
+    } on DioException catch (e) {
+      return left(Failure(error: e.message.toString()));
+    }
+  }
 }

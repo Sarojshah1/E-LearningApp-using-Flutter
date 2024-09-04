@@ -2,6 +2,8 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:equatable/equatable.dart';
 import 'package:llearning/features/Auth/data/model/UserModel.dart';
 import 'package:llearning/features/home/data/models/CategoryEntityModel.dart';
+import 'package:llearning/features/home/data/models/QuizModel.dart';
+import 'package:llearning/features/home/data/models/lesson_model.dart';
 
 import '../../domain/entity/course_entity.dart';
 import 'UserEntityModelforCourse.dart';
@@ -25,9 +27,9 @@ class CourseModel extends Equatable {
   @JsonKey(name: 'created_at')
   final DateTime createdAt;
   @JsonKey(name: 'lessons')
-  final List<String> lessons;
+  final List<LessonModel> lessons;
   @JsonKey(name: 'quizzes')
-  final List<String> quizzes;
+  final List<QuizModel> quizzes;
   @JsonKey(name: 'reviews')
   final List<String> reviews;
   @JsonKey(name: 'certificates')
@@ -85,7 +87,7 @@ class CourseModel extends Equatable {
       thumbnail: entity.thumbnail,
       createdAt: entity.createdAt,
       lessons: entity.lessons.map((lesson) => lesson).toList(),
-      quizzes: entity.quizzes.toList(),
+      quizzes: entity.quizzes.map((quiz)=>quiz).toList(),
       reviews: entity.reviews.toList(),
       certificates: entity.certificates.toList(),
     );

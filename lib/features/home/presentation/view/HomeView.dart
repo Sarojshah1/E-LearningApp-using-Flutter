@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:llearning/features/home/presentation/view/pages/MyLearningsPage.dart';
 import 'package:llearning/features/home/presentation/view/pages/ProfilePage.dart';
 import 'package:llearning/features/home/presentation/view/pages/SettingsPage.dart';
+import 'package:llearning/features/home/presentation/view/pages/blog_page.dart';
 import 'package:llearning/features/home/presentation/view/pages/coursesPage.dart';
 import 'package:llearning/features/home/presentation/view/pages/dashboardPage.dart';
 
@@ -17,9 +17,9 @@ class _HomeViewState extends ConsumerState<HomeView> {
   int _selectedIndex = 0;
 
   final List<Widget> _pages = [
-    const DashboardPage(),
+    ForumPostPage(),
     const CoursesPage(),
-    const MyLearningsPage(),
+    const BlogPage(),
     const ProfilePage(),
     const SettingsPage(),
   ];
@@ -81,8 +81,8 @@ class _HomeViewState extends ConsumerState<HomeView> {
             label: 'Courses',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.school),
-            label: 'My Learnings',
+            icon: Icon(Icons.book_online_outlined),
+            label: 'Blogs',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),

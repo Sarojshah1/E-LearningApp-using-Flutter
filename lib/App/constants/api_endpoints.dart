@@ -24,5 +24,19 @@ static const String getCourses="$baseUrl/courses/pagination";
   static String getReviewUrl(String courseId) {
     return "$baseUrl/review/reviews/course/$courseId";
   }
+  static String getCourseUrl(String courseId) {
+    return "$baseUrl/courses/$courseId";
+  }
+
+//   blogs
+static const String getBlogs="$baseUrl/blog/blogs";
+
+  static const String getLearnings="$baseUrl/enroll/user";
+
+
+//FormPost Api
+static const String createPost="$baseUrl/post";
+static const String getPost="$baseUrl/post";
+
 
 }
