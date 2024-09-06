@@ -7,6 +7,8 @@ class ForumPostState {
   final String? error;
   final List<ForumPostModel> forumPosts;
   final ForumPostModel? forumPost;
+  final bool hasReachedMax;
+  final int page;
 
 
   ForumPostState({
@@ -14,6 +16,8 @@ class ForumPostState {
     this.error,
     required this.forumPosts,
     this.forumPost,
+    required this.hasReachedMax,
+    required this.page,
 
   });
 
@@ -23,12 +27,15 @@ class ForumPostState {
       error: null,
       forumPosts: [],
       forumPost: null,
+        hasReachedMax: false,page: 0
     );
   }
 
   ForumPostState copyWith({
     bool? isLoading,
     String? error,
+    bool? hasReachedMax,
+    int? page,
     List<ForumPostModel>? forumPosts,
     ForumPostModel? forumPost,
 
@@ -38,6 +45,7 @@ class ForumPostState {
       error: error ?? this.error,
       forumPosts: forumPosts ?? this.forumPosts,
       forumPost: forumPost ?? this.forumPost,
+      hasReachedMax: hasReachedMax ?? this.hasReachedMax,page: page ?? this.page,
     );
   }
 

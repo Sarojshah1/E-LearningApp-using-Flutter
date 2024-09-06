@@ -37,6 +37,15 @@ static const String getBlogs="$baseUrl/blog/blogs";
 //FormPost Api
 static const String createPost="$baseUrl/post";
 static const String getPost="$baseUrl/post";
+  static String getpostlikeUrl(String postId) {
+    return "$baseUrl/post/$postId/like";
+  }
+  static String getpostcommentUrl(String postId) {
+    return "$baseUrl/post/$postId/comments";
+  }
+  static String getpostcommentReplyUrl(String postId,String commentId) {
+    return "$baseUrl/post/$postId/comments/$commentId/replies";
+  }
 
 
 }

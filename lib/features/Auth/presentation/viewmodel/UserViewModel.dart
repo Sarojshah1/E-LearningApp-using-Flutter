@@ -61,14 +61,19 @@ class UserViewModel extends StateNotifier<UserState>{
     );
   }
   Future<void> userLogin (String email,String password)async{
-    state=state.copyWith(isLoading: true);
+    print("Starting login");
+    state=state.copyWith(isLoading: true,error: null);
+    print("State after start: $state");
     final result =await userUseCase.userLogin(email, password);
     result.fold((failure){
+      print("Login failed: ${failure.error}");
       state = state.copyWith(isLoading: false, error: failure.error);
 
     }, (success){
+      print("Login successful");
       state = state.copyWith(isLoading: false, error: null);
     });
+    print("State after login: $state");
 
   }
 

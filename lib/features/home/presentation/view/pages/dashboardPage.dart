@@ -3,29 +3,74 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:llearning/features/FourmPosts/data/model/ForumPostModel.dart';
 import 'package:llearning/features/FourmPosts/presentation/view/CreatePostPage.dart';
 import 'package:llearning/features/FourmPosts/presentation/viewmodel/postViewModel.dart';
-
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 class ForumPostPage extends ConsumerStatefulWidget {
   @override
   _ForumPostPageState createState() => _ForumPostPageState();
 }
 
+
 class _ForumPostPageState extends ConsumerState<ForumPostPage> {
+  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
+  late ScrollController _scrollController;
+  bool _isLoading = false;
+  bool _isInitialLoad = true;
+
   @override
   void initState() {
     super.initState();
     Future.microtask(() {
       ref.read(postViewModelProvider.notifier).getPost();
+      setState(() {
+        _isInitialLoad = false; // Update state after initial load
+      });
+    });
+    _scrollController = ScrollController();
+    _scrollController.addListener(_onScroll);
+  }
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+  void _onScroll() {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent) {
+      _loadMorePosts();
+    }
+  }
+
+  Future<void> _loadMorePosts() async {
+    final postState = ref.read(postViewModelProvider);
+    if (_isLoading || postState.hasReachedMax) return;
+    setState(() {
+      _isLoading = true;
+    });
+    Future.microtask(() {
+      ref.read(postViewModelProvider.notifier).getPost();
+
+    });
+    // await ref.read(postViewModelProvider.notifier).getPost();
+    setState(() {
+      _isLoading = false;
     });
   }
 
+
   void _createPost() {
-    Navigator.push(context, MaterialPageRoute(builder: (context) => CreatePostPage()));
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => CreatePostPage()));
+  }
+
+  Future<void> _refreshPosts() async {
+    await ref.read(postViewModelProvider.notifier).getPost();
   }
 
   @override
   Widget build(BuildContext context) {
     final postState = ref.watch(postViewModelProvider);
-    final posts = postState.forumPosts;
+    final posts = postState.forumPosts ?? [];
+    final sortedPosts = (posts ?? []).toList()
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
     return Scaffold(
       appBar: AppBar(
@@ -38,13 +83,43 @@ class _ForumPostPageState extends ConsumerState<ForumPostPage> {
           ),
         ],
       ),
-      body: ListView(
-        padding: EdgeInsets.all(8.0),
-        children: posts.map((post) => PostWidget(post: post)).toList(),
+      body: RefreshIndicator(
+        key: _refreshIndicatorKey,
+        onRefresh: _refreshPosts,
+        child:_isInitialLoad
+            ? Center(
+          child: LoadingAnimationWidget.twistingDots(
+            leftDotColor: const Color(0xFF1A1A3F),
+            rightDotColor: const Color(0xFFEA3799),
+            size: 50,
+          ),
+        )
+            :  ListView.builder(
+          controller: _scrollController,
+          padding: EdgeInsets.all(8.0),
+          itemCount:sortedPosts.length,
+          itemBuilder: (context, index) {
+            if (index >= sortedPosts.length) {
+
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  child: LoadingAnimationWidget.twistingDots(
+                    leftDotColor: const Color(0xFF1A1A3F),
+                    rightDotColor: const Color(0xFFEA3799),
+                    size: 50,
+                  ),
+                ),
+              );
+            }
+            return PostWidget(post: sortedPosts[index]);
+          },
+        ),
       ),
     );
   }
 }
+
 
 class PostWidget extends ConsumerStatefulWidget {
   final ForumPostModel post;
@@ -57,6 +132,7 @@ class PostWidget extends ConsumerStatefulWidget {
 
 class _PostWidgetState extends ConsumerState<PostWidget> {
   bool _showComments = false;
+  int _commentsToShow = 3; // Start with showing 3 comments
   Map<int, bool> _showReplies = {};
   Map<int, TextEditingController> _replyControllers = {};
   bool _isLiked = false;
@@ -66,10 +142,10 @@ class _PostWidgetState extends ConsumerState<PostWidget> {
   void initState() {
     super.initState();
     _showReplies = {
-      for (int i = 0; i < widget.post.comments.length; i++) i: false,
+      for (int i = 0; i < (widget.post.comments?.length ?? 0); i++) i: false,
     };
     _replyControllers = {
-      for (int i = 0; i < widget.post.comments.length; i++) i: TextEditingController(),
+      for (int i = 0; i < (widget.post.comments?.length ?? 0); i++) i: TextEditingController(),
     };
   }
 
@@ -86,38 +162,78 @@ class _PostWidgetState extends ConsumerState<PostWidget> {
     });
   }
 
-  void _addComment() {
+  String _formatDate(DateTime date) {
+    String day = date.day.toString().padLeft(2, '0');
+    String month = _getMonthName(date.month);
+    String year = date.year.toString();
+    String hour = (date.hour % 12 == 0 ? 12 : date.hour % 12).toString();
+    String minute = date.minute.toString().padLeft(2, '0');
+    String period = date.hour >= 12 ? 'PM' : 'AM';
+    return '$month $day, $year at $hour:$minute $period';
+  }
+
+  String _getMonthName(int month) {
+    const List<String> months = [
+      'January', 'February', 'March', 'April', 'May', 'June', 'July',
+      'August', 'September', 'October', 'November', 'December'
+    ];
+    return months[month - 1];
+  }
+
+  void _addComment() async {
     if (_commentController.text.isNotEmpty) {
+      final viewModel = ref.read(postViewModelProvider.notifier);
+      await viewModel.addComment(widget.post.id, _commentController.text);
       setState(() {
-        // Implement adding a comment here
         _commentController.clear();
+        _showComments = true;
+        _commentsToShow = 3; // Reset to show 3 comments
       });
     }
   }
 
-  void _addReply(int commentIndex) {
-    final controller = _replyControllers[commentIndex];
-    if (controller != null && controller.text.isNotEmpty) {
+  void _addReply(int commentIndex, String commentId) async {
+    if (_replyControllers[commentIndex]!.text.isNotEmpty) {
+      final newReplyText = _replyControllers[commentIndex]!.text;
+      final viewModel = ref.read(postViewModelProvider.notifier);
+      await viewModel.addCommentReply(
+          widget.post.id, commentId, newReplyText);
       setState(() {
-        // Implement adding a reply here
-        controller.clear();
+
+        _replyControllers[commentIndex]!.clear();
+        _showReplies[commentIndex] = false; // Hide replies after adding
       });
     }
   }
 
   void _likePost() {
+    ref.read(postViewModelProvider.notifier).addLike(widget.post.id);
     setState(() {
       _isLiked = !_isLiked;
     });
   }
 
+  void _loadMoreComments() {
+    setState(() {
+      _commentsToShow += 3; // Load 3 more comments on each click
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    final postState = ref.watch(postViewModelProvider);
+    final post = postState.forumPosts
+        .firstWhere((p) => p.id == widget.post.id, orElse: () => widget.post);
+    final formattedDate = _formatDate(widget.post.createdAt);
+    final totalComments = post.comments?.length ?? 0;
+    final totalLikes=post.likes.length;
+    print(post.comments);
+
     return Card(
-      margin: EdgeInsets.symmetric(vertical: 8.0),
-      elevation: 5.0,
+      margin: EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
+      elevation: 6.0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12.0),
+        borderRadius: BorderRadius.circular(16.0),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -128,7 +244,8 @@ class _PostWidgetState extends ConsumerState<PostWidget> {
             Row(
               children: [
                 CircleAvatar(
-                  backgroundImage: NetworkImage("http://10.0.2.2:3000/profile/${widget.post.userId.profilePicture}"),
+                  backgroundImage: NetworkImage(
+                      "http://10.0.2.2:3000/profile/${widget.post.userId.profilePicture}"),
                   radius: 24.0,
                 ),
                 SizedBox(width: 8.0),
@@ -150,7 +267,11 @@ class _PostWidgetState extends ConsumerState<PostWidget> {
               ],
             ),
             SizedBox(height: 8.0),
-            // Title
+            Text(
+              formattedDate,
+              style: TextStyle(color: Colors.grey, fontSize: 12),
+            ),
+            SizedBox(height: 8.0),
             Text(
               widget.post.title,
               style: TextStyle(
@@ -160,29 +281,27 @@ class _PostWidgetState extends ConsumerState<PostWidget> {
               ),
             ),
             SizedBox(height: 8.0),
-            // Content
             Text(
               widget.post.content,
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.black87,
-              ),
-            ),
-            SizedBox(height: 8.0),
-            // Tags
-            Wrap(
-              spacing: 8.0,
-              children: widget.post.tags.map((tag) => Chip(
-                label: Text(tag),
-                backgroundColor: Colors.blueAccent.withOpacity(0.1),
-                labelStyle: TextStyle(color: Colors.blueAccent),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20.0),
-                ),
-              )).toList(),
+              style: TextStyle(fontSize: 16, color: Colors.black87),
             ),
             SizedBox(height: 12.0),
-            // Likes and Comments
+            Wrap(
+              spacing: 8.0,
+              children: widget.post.tags
+                  .map(
+                    (tag) => Chip(
+                  label: Text(tag),
+                  backgroundColor: Colors.blueAccent.withOpacity(0.1),
+                  labelStyle: TextStyle(color: Colors.blueAccent),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20.0),
+                  ),
+                ),
+              )
+                  .toList(),
+            ),
+            SizedBox(height: 12.0),
             Row(
               children: [
                 IconButton(
@@ -193,7 +312,7 @@ class _PostWidgetState extends ConsumerState<PostWidget> {
                   onPressed: _likePost,
                 ),
                 SizedBox(width: 4.0),
-                Text('${widget.post.likes.length}'),
+                Text('$totalLikes', style: TextStyle(fontSize: 16)),
                 SizedBox(width: 16.0),
                 GestureDetector(
                   onTap: () {
@@ -206,7 +325,9 @@ class _PostWidgetState extends ConsumerState<PostWidget> {
                       Icon(Icons.comment, size: 18, color: Colors.blue),
                       SizedBox(width: 4.0),
                       Text(
-                        _showComments ? 'Hide Comments' : 'Show Comments (${widget.post.comments.length})',
+                        _showComments
+                            ? 'Hide Comments'
+                            : 'Show Comments ($totalComments)',
                         style: TextStyle(color: Colors.blue, fontSize: 14),
                       ),
                     ],
@@ -215,143 +336,182 @@ class _PostWidgetState extends ConsumerState<PostWidget> {
               ],
             ),
             SizedBox(height: 12.0),
-            // Comments
             if (_showComments)
+
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: widget.post.comments.asMap().entries.map((entry) {
-                  int index = entry.key;
-                  final comment = entry.value;
+                children: [
+                  for (int i = (totalComments - 1);
+                  i >= 0 && i >= totalComments - _commentsToShow; i--)
 
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 8.0),
-                    child: Container(
-                      padding: EdgeInsets.all(12.0),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[100],
-                        borderRadius: BorderRadius.circular(8.0),
-                        border: Border.all(color: Colors.grey[300]!),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              CircleAvatar(
-                                backgroundImage: NetworkImage("http://10.0.2.2:3000/profile/${comment.userId.profilePicture}"),
-                                radius: 24.0,
-                              ),
-                              SizedBox(width: 8.0),
-                              Expanded(
-                                child: Text(
-                                  '${comment.userId.name}: ${comment.content}',
-                                  style: TextStyle(fontSize: 14),
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 6.0),
-                          GestureDetector(
-                            onTap: () => _toggleReplies(index),
-                            child: Text(
-                              _showReplies[index]! ? 'Hide Replies' : 'Show Replies (${comment.replies.length})',
-                              style: TextStyle(color: Colors.blue, fontSize: 14),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12.0),
+                      child: Container(
+                        padding: EdgeInsets.all(16.0),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[100],
+                          borderRadius: BorderRadius.circular(12.0),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 6.0,
+                              offset: Offset(0, 2),
                             ),
-                          ),
-                          if (_showReplies[index]!)
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: comment.replies.map((reply) {
-                                return Padding(
-                                  padding: const EdgeInsets.only(left: 32.0, top: 4.0),
-                                  child: Row(
-                                    children: [
-                                      CircleAvatar(
-                                        backgroundImage: NetworkImage("http://10.0.2.2:3000/profile/${reply.userId.profilePicture}"),
-                                        radius: 24.0,
-                                      ),
-                                      SizedBox(width: 8.0),
-                                      Expanded(
-                                        child: Text(
-                                          '${reply.userId.name}: ${reply.content}',
-                                          style: TextStyle(fontSize: 14),
-                                        ),
-                                      ),
-                                    ],
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                CircleAvatar(
+                                  backgroundImage: NetworkImage(
+                                      "http://10.0.2.2:3000/profile/${widget.post.comments![i].userId.profilePicture}"
                                   ),
-                                );
-                              }).toList(),
-                            ),
-                          SizedBox(height: 8.0),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: TextField(
-                                  controller: _replyControllers[index],
-                                  decoration: InputDecoration(
-                                    hintText: 'Write a reply...',
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(8.0),
+                                  radius: 18.0,
+                                ),
+                                SizedBox(width: 8.0),
+                                Expanded(
+                                  child: Text(
+                                    post.comments[i].userId.name,
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                      color: Colors.deepPurple,
                                     ),
                                   ),
                                 ),
-                              ),
-                              SizedBox(width: 8.0),
-                              ElevatedButton(
-                                onPressed: () => _addReply(index),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.blueAccent,
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8.0),
-                                  ),
+                                SizedBox(width: 8.0),
+                                Text(
+                                  _formatDate(widget.post.comments[i].createdAt),
+                                  style: TextStyle(color: Colors.grey, fontSize: 12),
                                 ),
-                                child: Text('Reply'),
+                              ],
+                            ),
+                            SizedBox(height: 8.0),
+                            Text(
+                              post.comments![i].content,
+                              style: TextStyle(color: Colors.black87, fontSize: 14),
+                            ),
+                            SizedBox(height: 8.0),
+                            if (_showReplies[i] ?? false)
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  for (var reply in post.comments![i].replies ?? [])
+                                    Padding(
+                                      padding: const EdgeInsets.only(bottom: 8.0),
+                                      child: Container(
+                                        padding: EdgeInsets.all(12.0),
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey[200],
+                                          borderRadius: BorderRadius.circular(8.0),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.black.withOpacity(0.1),
+                                              blurRadius: 4.0,
+                                              offset: Offset(0, 2),
+                                            ),
+                                          ],
+                                        ),
+                                        child: Row(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            CircleAvatar(
+                                              backgroundImage: NetworkImage(
+                                                  "http://10.0.2.2:3000/profile/${reply.userId.profilePicture}"
+                                              ),
+                                              radius: 18.0,
+                                            ),
+                                            SizedBox(width: 8.0),
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    reply.userId.name,
+                                                    style: TextStyle(
+                                                      fontWeight: FontWeight.bold,
+                                                      fontSize: 14,
+                                                      color: Colors.deepPurple,
+                                                    ),
+                                                  ),
+                                                  SizedBox(height: 4.0),
+                                                  Text(
+                                                    reply.content,
+                                                    style: TextStyle(color: Colors.black87, fontSize: 14),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                ],
                               ),
-                            ],
-                          ),
-                        ],
+                            TextButton(
+                              onPressed: () => _toggleReplies(i),
+                              child: Text(
+                                _showReplies[i] ??false ? 'Hide Replies' : 'Show Replies (${post.comments![i].replies?.length ?? 0})',
+                                style: TextStyle(color: Colors.blue, fontSize: 14),
+                              ),
+                            ),
+                            if (_showReplies[i] ?? false)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 8.0),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: TextField(
+                                        controller: _replyControllers[i],
+                                        decoration: InputDecoration(
+                                          hintText: 'Write a reply...',
+                                          filled: true,
+                                          fillColor: Colors.grey[200],
+                                          border: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(8.0),
+                                            borderSide: BorderSide.none,
+                                          ),
+                                          suffixIcon: IconButton(
+                                            icon: Icon(Icons.send),
+                                            onPressed: () => _addReply(i, post.comments![i].id),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                          ],
+                        ),
                       ),
                     ),
-                  );
-                }).toList(),
+                  if (_commentsToShow < totalComments)
+                    Center(
+                      child: TextButton(
+                        onPressed: _loadMoreComments,
+                        child: Text('Load More', style: TextStyle(color: Colors.blue, fontSize: 14)),
+                      ),
+                    ),
+                ],
               ),
-            SizedBox(height: 16.0),
-            // Add Comment
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _commentController,
-                    decoration: InputDecoration(
-                      hintText: 'Write a comment...',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      contentPadding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
-                    ),
-                  ),
+            SizedBox(height: 12.0),
+            TextField(
+              controller: _commentController,
+              decoration: InputDecoration(
+                hintText: 'Add a comment...',
+                filled: true,
+                fillColor: Colors.grey[200],
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide: BorderSide.none,
                 ),
-                SizedBox(width: 8.0),
-                ElevatedButton(
+                suffixIcon: IconButton(
+                  icon: Icon(Icons.send),
                   onPressed: _addComment,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blueAccent,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                  ),
-                  child: Text(
-                    'Comment',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.2,
-                    ),
-                  ),
                 ),
-              ],
+              ),
             ),
           ],
         ),
@@ -359,3 +519,4 @@ class _PostWidgetState extends ConsumerState<PostWidget> {
     );
   }
 }
+

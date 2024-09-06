@@ -20,7 +20,7 @@ class BlogRepositoryImpl extends BlogRepository{
   final BlogRemoteDataSource remoteDataSource;
   BlogRepositoryImpl({required this.remoteDataSource});
   @override
-  Future<Either<Failure, List<BlogModel>>> getBlogs() async{
-    return await remoteDataSource.getBlogs();
+  Future<Either<Failure, List<BlogModel>>> getBlogs({required int page, required int limit}) async{
+    return await remoteDataSource.getBlogs(page: page, limit: limit);
   }
 }

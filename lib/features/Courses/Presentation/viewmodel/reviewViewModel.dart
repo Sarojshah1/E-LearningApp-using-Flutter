@@ -28,6 +28,9 @@ class ReviewViewModel extends StateNotifier<ReviewState>{
     state = state.copyWith(isLoading: true);
     final result=await reviewUseCase.addreview(courseId, comment, rating);
     result.fold((failure)=>state=state.copyWith(isLoading: false,error: failure.error),
-        (success)=>state=state.copyWith(isLoading: false));
+        (success){
+          final updatedReviews = [...state.reviews, success];
+      state=state.copyWith(isLoading: false,reviews: updatedReviews);
+        });
   }
 }

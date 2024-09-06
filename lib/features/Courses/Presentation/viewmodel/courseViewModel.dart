@@ -21,7 +21,7 @@ class CourseViewModel extends StateNotifier<CourseState> {
     final hasReachedMax = currentState.hasReachedMax;
     final courses=currentState.courses;
     if(!hasReachedMax){
-      final result= await courseUseCase.getCourses(page: page, limit: 10);
+      final result= await courseUseCase.getCourses(page: page, limit: 2);
       result.fold((failure)=>state=state.copyWith(hasReachedMax: true,isLoading: false,error: failure.error), (data){
         if(data.isEmpty){
           state=state.copyWith(hasReachedMax: true,isLoading: false);

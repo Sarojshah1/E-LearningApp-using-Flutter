@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
@@ -18,12 +17,13 @@ class _PDFViewPageState extends State<PDFViewPage> {
   String? _localFilePath;
   bool _isLoading = true;
   bool _hasError = false;
+
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _downloadPDF();
   }
+
   Future<void> _downloadPDF() async {
     final url = "http://10.0.2.2:3000/uploads/pdfs/${widget.pdfUrl}";
     final dir = await getApplicationDocumentsDirectory();
@@ -66,8 +66,49 @@ class _PDFViewPageState extends State<PDFViewPage> {
       });
     }
   }
+
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text('PDF Viewer'),
+          flexibleSpace: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.blueAccent, Colors.purpleAccent],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+          ),
+        ),
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    if (_hasError) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text('PDF Viewer'),
+          flexibleSpace: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.blueAccent, Colors.purpleAccent],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+          ),
+        ),
+        body: Center(
+          child: Text('Error loading PDF.'),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text('PDF Viewer'),
@@ -81,9 +122,11 @@ class _PDFViewPageState extends State<PDFViewPage> {
           ),
         ),
       ),
-      body: PDFView(
-        filePath: _localFilePath, // Provide the local file path or network URL here
-      ),
+      body: _localFilePath != null
+          ? PDFView(
+        filePath: _localFilePath,
+      )
+          : Center(child: Text('No PDF file found')),
     );
   }
 }

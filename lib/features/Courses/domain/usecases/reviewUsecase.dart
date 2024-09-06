@@ -21,7 +21,7 @@ class ReviewUseCase{
 
   }
 
-  Future<Either<Failure,bool>> addreview(String courseId,String comment,int rating)async{
+  Future<Either<Failure,ReviewModel>> addreview(String courseId,String comment,int rating)async{
     return await reviewRepository.addreview(courseId, comment, rating);
   }
 }

@@ -29,7 +29,19 @@ class PostRepositoryImpl extends PostRepository{
     return await dataSource.createPost(title, content, tags);
   }
   @override
-  Future<Either<Failure, List<ForumPostModel>>> getPost()async {
-    return await dataSource.getPost();
+  Future<Either<Failure, List<ForumPostModel>>> getPost({required int page, required int limit})async {
+    return await dataSource.getPost(page: page, limit: limit );
+  }
+  @override
+  Future<Either<Failure, List<String>>> addlike(String postId) async{
+    return await dataSource.addlike(postId);
+  }
+  @override
+  Future<Either<Failure,CommentModel>> addComment(String postId, String content)async {
+    return await dataSource.addComment(postId, content);
+  }
+  @override
+  Future<Either<Failure, CommentReplyModel>> addCommentReply(String postId, String commentId, String content) async{
+    return await dataSource.addCommentReply(postId, commentId, content);
   }
 }

@@ -65,6 +65,7 @@ dependencies:
   maps_launcher: ^2.2.1
   khalti_flutter: ^3.0.0
   lottie: ^3.1.2
+  loading_animation_widget: ^1.2.1
 
   http:
 

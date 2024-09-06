@@ -4,5 +4,5 @@ import '../../../../cores/failure/failure.dart';
 import '../../data/model/blog_model.dart';
 
 abstract class BlogRepository{
-  Future<Either<Failure,List<BlogModel>>> getBlogs();
+  Future<Either<Failure,List<BlogModel>>> getBlogs({required int page, required int limit});
 }

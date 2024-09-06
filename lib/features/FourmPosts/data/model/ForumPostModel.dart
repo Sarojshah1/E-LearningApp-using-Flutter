@@ -51,6 +51,19 @@ class CommentReplyModel extends Equatable {
       createdAt: entity.createdAt,
     );
   }
+  CommentReplyModel copyWith({
+    String? id,
+    UserModel? userId,
+    String? content,
+    DateTime? createdAt,
+  }) {
+    return CommentReplyModel(
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      content: content ?? this.content,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
 
   @override
   List<Object?> get props => [id, userId, content, createdAt];
@@ -69,14 +82,14 @@ class CommentModel extends Equatable {
   @JsonKey(name: 'created_at')
   final DateTime createdAt;
 
-  final List<CommentReplyModel> replies;
+  final List<CommentReplyModel>? replies;
 
   const CommentModel({
     required this.id,
     required this.userId,
     required this.content,
     required this.createdAt,
-    required this.replies,
+    this.replies,
   });
 
   factory CommentModel.fromJson(Map<String, dynamic> json) => _$CommentModelFromJson(json);
@@ -88,7 +101,7 @@ class CommentModel extends Equatable {
       userId: userId,
       content: content,
       createdAt: createdAt,
-      replies: replies.map((reply) => reply.toEntity()).toList(),
+      replies: replies!.map((reply) => reply.toEntity()).toList(),
     );
   }
 
@@ -99,6 +112,21 @@ class CommentModel extends Equatable {
       content: entity.content,
       createdAt: entity.createdAt,
       replies: entity.replies.map((reply) => CommentReplyModel.fromEntity(reply)).toList(),
+    );
+  }
+  CommentModel copyWith({
+    String? id,
+    UserModel? userId,
+    String? content,
+    DateTime? createdAt,
+    List<CommentReplyModel>? replies,
+  }) {
+    return CommentModel(
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      content: content ?? this.content,
+      createdAt: createdAt ?? this.createdAt,
+      replies: replies ?? this.replies,
     );
   }
 
@@ -170,6 +198,29 @@ class ForumPostModel extends Equatable {
       tags: entity.tags.toList(),
       likes: entity.likes.toList(),
       comments: entity.comments.map((comment) => CommentModel.fromEntity(comment)).toList(),
+    );
+  }
+  ForumPostModel copyWith({
+    String? id,
+    UserModel? userId,
+    String? title,
+    String? content,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    List<String>? tags,
+    List<String>? likes,
+    List<CommentModel>? comments,
+  }) {
+    return ForumPostModel(
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      title: title ?? this.title,
+      content: content ?? this.content,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      tags: tags ?? this.tags,
+      likes: likes ?? this.likes,
+      comments: comments ?? this.comments,
     );
   }
 

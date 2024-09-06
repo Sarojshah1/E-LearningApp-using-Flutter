@@ -18,8 +18,11 @@ class CourseDetailsPage extends ConsumerStatefulWidget {
 }
 
 class _CourseDetailsPageState extends ConsumerState<CourseDetailsPage> {
-  int visibleReviewCount = 5; // Number of reviews to show initially
+  int visibleReviewCount = 2; // Number of reviews to show initially
   bool showAllReviews = false;
+  final TextEditingController _reviewController = TextEditingController();
+  double _rating = 0;
+  int _currentPage = 1;
   @override
 
   void initState() {
@@ -30,8 +33,7 @@ class _CourseDetailsPageState extends ConsumerState<CourseDetailsPage> {
     });
   }
   String activeTab = "overview";
-  final TextEditingController _reviewController = TextEditingController();
-  double _rating = 0;
+
 
   void _handleBuyNow() {
     Navigator.pushNamed(context, '/payments', arguments: widget.course);
@@ -243,9 +245,14 @@ class _CourseDetailsPageState extends ConsumerState<CourseDetailsPage> {
   }
 
   Widget _buildReviews(List<ReviewModel> reviews) {
-    double overallRating = reviews.isNotEmpty
+    final sortedReviews = reviews
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    double overallRating = sortedReviews.isNotEmpty
         ? reviews.map((r) => r.rating).reduce((a, b) => a + b) / reviews.length
         : 0;
+    final startIndex = visibleReviewCount * (_currentPage-1);
+    final endIndex = (startIndex + visibleReviewCount) > sortedReviews.length ? sortedReviews.length : (startIndex + visibleReviewCount);
+    final visibleReviews = sortedReviews.sublist(startIndex , endIndex );
 
     return Container(
       padding: EdgeInsets.all(16),
@@ -294,7 +301,7 @@ class _CourseDetailsPageState extends ConsumerState<CourseDetailsPage> {
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
           SizedBox(height: 10),
-          ...reviews.map((review) {
+          ...visibleReviews.map((review) {
             return Padding(
               padding: const EdgeInsets.only(bottom: 8.0),
               child: Card(
@@ -346,11 +353,45 @@ class _CourseDetailsPageState extends ConsumerState<CourseDetailsPage> {
               ),
             );
           }).toList(),
+          SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              if (_currentPage > 0)
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      _currentPage--;
+                    });
+                  },
+                  child: Text('Previous'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              if (endIndex < sortedReviews.length)
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      _currentPage++;
+                    });
+                  },
+                  child: Text('Next'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+            ],
+          ),
+
           SizedBox(height: 20),
           Text(
             'Add Your Review',
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
+
           SizedBox(height: 10),
           RatingBar.builder(
             itemCount: 5,

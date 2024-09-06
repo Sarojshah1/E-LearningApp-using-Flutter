@@ -18,11 +18,14 @@ class BlogRemoteDataSource{
    required this.dio,
     required this.userSharedPrefs
 });
-  Future<Either<Failure,List<BlogModel>>> getBlogs()async{
+  Future<Either<Failure,List<BlogModel>>> getBlogs({required int page, required int limit})async{
     try{
       final token = await userSharedPrefs.getUserToken();
       final authtoken=token.fold((l) => throw Failure(error: l.error), (r) => r);
-      Response response =await dio.get(ApiEndpoints.getBlogs);
+      Response response =await dio.get(ApiEndpoints.getBlogs,queryParameters: {
+        'page': page,
+        'limit': limit,
+      },);
       if(response.statusCode==200){
         final List<dynamic> responsedata=response.data;
         final List<BlogModel> blogs=responsedata.map((json)=>BlogModel.fromJson(json)).toList();

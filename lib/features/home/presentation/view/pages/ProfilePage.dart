@@ -7,7 +7,7 @@ import 'package:llearning/features/Courses/domain/usecases/course_usecase.dart';
 import 'package:llearning/features/Mylearnings/presentation/view/MyLearningPage.dart';
 import 'package:llearning/features/profile/presentation/view/CertificatesPage.dart';
 import 'package:llearning/features/profile/presentation/view/QuizResultsPage.dart';
-
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import '../../../../Auth/presentation/view/EditProfile.dart';
 import '../../../../Auth/presentation/viewModel/userViewModel.dart';
 
@@ -73,7 +73,13 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     final userdetail = user.user;
 
     if (userdetail == null) {
-      return const Center(child: CircularProgressIndicator());
+      return Center(
+        child: LoadingAnimationWidget.twistingDots(
+          leftDotColor: const Color(0xFF1A1A3F),
+          rightDotColor: const Color(0xFFEA3799),
+          size: 50,
+        ),
+      );
     }
     return Scaffold(
       appBar: AppBar(

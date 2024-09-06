@@ -15,8 +15,17 @@ class PostUseCase{
     return await repository.createPost(title, content, tags);
     
   }
-  Future<Either<Failure,List<ForumPostModel>>> getPost()async{
-    return await repository.getPost();
+  Future<Either<Failure,List<ForumPostModel>>> getPost({required int page, required int limit})async{
+    return await repository.getPost(page: page, limit: limit);
 
+  }
+  Future<Either<Failure,List<String>>> addlike(String postId)async{
+    return await repository.addlike(postId);
+  }
+  Future<Either<Failure, CommentModel>> addComment(String postId, String content)async{
+    return await repository.addComment(postId, content);
+  }
+  Future<Either<Failure,CommentReplyModel>> addCommentReply(String postId,String commentId,String content)async{
+    return await repository.addCommentReply(postId, commentId, content);
   }
 }

@@ -4,6 +4,7 @@ import 'package:llearning/features/blog/presentation/view/blog_details_page.dart
 import 'package:llearning/features/blog/presentation/viewmodel/blog_view_model.dart';
 import '../../../../blog/data/model/blog_model.dart';
 import '../../../../blog/presentation/wigets/BlogCard.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class BlogPage extends ConsumerStatefulWidget {
   const BlogPage({Key? key}) : super(key: key);
@@ -14,15 +15,16 @@ class BlogPage extends ConsumerStatefulWidget {
 
 class _BlogPageState extends ConsumerState<BlogPage> {
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
-  // late ScrollController _scrollController;
+  late ScrollController _scrollController;
   late TextEditingController _searchController;
   String _searchQuery = '';
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    // _scrollController = ScrollController();
-    // _scrollController.addListener(_onScroll);
+    _scrollController = ScrollController();
+    _scrollController.addListener(_onScroll);
     Future.microtask(() {
       ref.read(blogViewModelProvider.notifier).getBlogs();
     });
@@ -32,24 +34,30 @@ class _BlogPageState extends ConsumerState<BlogPage> {
 
   @override
   void dispose() {
-    // _scrollController.dispose();
+    _scrollController.dispose();
     _searchController.removeListener(_debounceSearchChanged);
     _searchController.dispose();
     super.dispose();
   }
 
-  // void _onScroll() {
-  //   if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent) {
-  //     _loadMoreBlogs();
-  //   }
-  // }
+  void _onScroll() {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent) {
+      _loadMoreBlogs();
+    }
+  }
 
   Future<void> _loadMoreBlogs() async {
-    // Implement loading more blogs if needed
-    await Future.delayed(const Duration(seconds: 2));
-    if (mounted) {
-      _refreshIndicatorKey.currentState?.show();
-    }
+    final blogstate=ref.read(blogViewModelProvider);
+    if(_isLoading || blogstate.hasReachedMax) return;
+    setState(() {
+      _isLoading = true;
+    });
+    await ref.read(blogViewModelProvider.notifier).getBlogs();
+    setState(() {
+      _isLoading = false;
+    });
+
+
   }
 
   void _debounceSearchChanged() {
@@ -59,6 +67,9 @@ class _BlogPageState extends ConsumerState<BlogPage> {
         _searchQuery = _searchController.text;
       });
     });
+  }
+  Future<void> _refreshBlogs() async {
+    await ref.read(blogViewModelProvider.notifier).getBlogs();
   }
 
   void _onBlogCardTap(BlogModel blog) {
@@ -111,7 +122,7 @@ class _BlogPageState extends ConsumerState<BlogPage> {
       ),
       body: RefreshIndicator(
         key: _refreshIndicatorKey,
-        onRefresh: _loadMoreBlogs,
+        onRefresh: _refreshBlogs,
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -147,15 +158,34 @@ class _BlogPageState extends ConsumerState<BlogPage> {
               // List of Blogs
               Expanded(
                 child: blogState.isLoading
-                    ? Center(child: CircularProgressIndicator())
-                    : blogState.error != null
+                    ? Center(
+                  child: LoadingAnimationWidget.twistingDots(
+                    leftDotColor: const Color(0xFF1A1A3F),
+                    rightDotColor: const Color(0xFFEA3799),
+                    size: 50,
+                  ),
+                )
+
+                  : blogState.error != null
                     ? Center(child: Text('Error: ${blogState.error}'))
                     : filteredBlogs.isEmpty
                     ? Center(child: Text('No blogs found.'))
                     : ListView.builder(
-                  // controller: _scrollController,
-                  itemCount: filteredBlogs.length,
+                  controller: _scrollController,
+                  itemCount: filteredBlogs.length + (_isLoading ? 1 : 0),
                   itemBuilder: (context, index) {
+                    if (index >= filteredBlogs.length) {
+                      return Center(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 20),
+                          child: LoadingAnimationWidget.twistingDots(
+                            leftDotColor: const Color(0xFF1A1A3F),
+                            rightDotColor: const Color(0xFFEA3799),
+                            size: 50,
+                          ),
+                        ),
+                      );
+                    }
                     final blog = filteredBlogs[index];
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 20.0),

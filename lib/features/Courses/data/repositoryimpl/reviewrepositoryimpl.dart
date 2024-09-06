@@ -27,7 +27,7 @@ class ReviewRepositoryImpl extends ReviewRepository{
     return await remoteDataSource.getReviews(courseId);
   }
   @override
-  Future<Either<Failure, bool>> addreview(String courseId, String comment, int rating) async{
+  Future<Either<Failure, ReviewModel>> addreview(String courseId, String comment, int rating) async{
    return await remoteDataSource.addreview(courseId, comment, rating);
   }
 }

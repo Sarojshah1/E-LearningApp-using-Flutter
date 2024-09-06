@@ -1,29 +1,48 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:llearning/features/Auth/presentation/view/ChangePasswordScreen.dart';
+import 'package:llearning/features/Auth/presentation/view/LoginView.dart';
 import 'package:llearning/features/Settings/presentation/view/AboutUs.dart';
 import 'package:llearning/features/profile/presentation/view/SecurityPage.dart';
+import '../../../../../cores/shared_pref/user_shared_pref.dart';
 import '../../../../Settings/presentation/view/ContactUsPage.dart';
 import '../../../../profile/presentation/view/NotificationsPage.dart';
 
-class SettingsPage extends StatefulWidget {
+final userSharedPrefsProvider = Provider<UserSharedPrefs>((ref) {
+  return UserSharedPrefs();
+});
+
+class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({Key? key}) : super(key: key);
 
   @override
   _SettingsPageState createState() => _SettingsPageState();
 }
 
-class _SettingsPageState extends State<SettingsPage> {
+class _SettingsPageState extends ConsumerState<SettingsPage> {
   bool _isDarkMode = false;
   String _selectedLanguage = 'English';
+
+  Future<void> _handleLogout(BuildContext context, WidgetRef ref) async {
+    final userPrefs = ref.read(userSharedPrefsProvider);
+    await userPrefs.deleteUserToken();
+
+
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => LoginView()),
+          (Route<dynamic> route) => false,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Settings', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        title: const Text('Settings', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
         centerTitle: true,
         flexibleSpace: Container(
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             gradient: LinearGradient(
               colors: [Colors.teal, Colors.blueAccent],
               begin: Alignment.topLeft,
@@ -33,7 +52,7 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
       ),
       body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
         child: ListView(
           children: [
             Text(
@@ -44,12 +63,12 @@ class _SettingsPageState extends State<SettingsPage> {
                 color: Colors.teal[800],
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             _buildCard(
               children: [
                 SwitchListTile(
-                  title: Text('Dark Mode'),
-                  subtitle: Text('Toggle dark mode for better night-time reading'),
+                  title: const Text('Dark Mode'),
+                  subtitle: const Text('Toggle dark mode for better night-time reading'),
                   value: _isDarkMode,
                   onChanged: (bool value) {
                     setState(() {
@@ -60,9 +79,9 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
                 Divider(height: 1, color: Colors.grey[300]),
                 ListTile(
-                  leading: Icon(Icons.language, color: Colors.teal),
-                  title: Text('Language'),
-                  subtitle: Text('Select your preferred language'),
+                  leading: const Icon(Icons.language, color: Colors.teal),
+                  title: const Text('Language'),
+                  subtitle: const Text('Select your preferred language'),
                   trailing: DropdownButton<String>(
                     value: _selectedLanguage,
                     onChanged: (String? newValue) {
@@ -82,73 +101,73 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
               ],
             ),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
             _buildCard(
               children: [
                 ListTile(
-                  leading: Icon(Icons.notifications, color: Colors.teal),
-                  title: Text('Notifications'),
-                  subtitle: Text('Manage notifications for Courses and grades'),
+                  leading: const Icon(Icons.notifications, color: Colors.teal),
+                  title: const Text('Notifications'),
+                  subtitle: const Text('Manage notifications for Courses and grades'),
                   onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context)=>const NotificationsPage()));
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => const NotificationsPage()));
                   },
                 ),
                 Divider(height: 1, color: Colors.grey[300]),
                 ListTile(
-                  leading: Icon(Icons.lock, color: Colors.teal),
-                  title: Text('Change Password'),
-                  subtitle: Text('Update your account password'),
+                  leading: const Icon(Icons.lock, color: Colors.teal),
+                  title: const Text('Change Password'),
+                  subtitle: const Text('Update your account password'),
                   onTap: () {
                     Navigator.push(context, MaterialPageRoute(builder: (context) => ChangePasswordScreen()));
                   },
                 ),
                 Divider(height: 1, color: Colors.grey[300]),
                 ListTile(
-                  leading: Icon(Icons.privacy_tip, color: Colors.teal),
-                  title: Text('Privacy'),
-                  subtitle: Text('Review and update privacy settings'),
+                  leading: const Icon(Icons.privacy_tip, color: Colors.teal),
+                  title: const Text('Privacy'),
+                  subtitle: const Text('Review and update privacy settings'),
                   onTap: () {
                     // Navigate to privacy settings page
                   },
                 ),
                 Divider(height: 1, color: Colors.grey[300]),
                 ListTile(
-                  leading: Icon(Icons.security, color: Colors.teal),
-                  title: Text('Security'),
-                  subtitle: Text('Manage security settings'),
+                  leading: const Icon(Icons.security, color: Colors.teal),
+                  title: const Text('Security'),
+                  subtitle: const Text('Manage security settings'),
                   onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context)=>const SecurityPage()));
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => const SecurityPage()));
                   },
                 ),
               ],
             ),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
             _buildCard(
               children: [
                 ListTile(
-                  leading: Icon(Icons.info, color: Colors.teal),
-                  title: Text('About Us'),
-                  subtitle: Text('Learn more about our platform'),
+                  leading: const Icon(Icons.info, color: Colors.teal),
+                  title: const Text('About Us'),
+                  subtitle: const Text('Learn more about our platform'),
                   onTap: () {
                     Navigator.push(context, MaterialPageRoute(builder: (context) => AboutUsPage()));
                   },
                 ),
                 Divider(height: 1, color: Colors.grey[300]),
                 ListTile(
-                  leading: Icon(Icons.contact_mail, color: Colors.teal),
-                  title: Text('Contact Us'),
-                  subtitle: Text('Reach out to support for help'),
+                  leading: const Icon(Icons.contact_mail, color: Colors.teal),
+                  title: const Text('Contact Us'),
+                  subtitle: const Text('Reach out to support for help'),
                   onTap: () {
                     Navigator.push(context, MaterialPageRoute(builder: (context) => ContactUsPage()));
                   },
                 ),
                 Divider(height: 1, color: Colors.grey[300]),
                 ListTile(
-                  leading: Icon(Icons.exit_to_app, color: Colors.red),
-                  title: Text('Logout'),
-                  subtitle: Text('Sign out of your account'),
+                  leading: const Icon(Icons.exit_to_app, color: Colors.red),
+                  title: const Text('Logout'),
+                  subtitle: const Text('Sign out of your account'),
                   onTap: () {
-                    // Handle logout action
+                    _handleLogout(context, ref); // Handle logout action
                   },
                 ),
               ],

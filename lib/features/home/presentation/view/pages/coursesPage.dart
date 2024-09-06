@@ -4,6 +4,7 @@ import 'package:llearning/features/Courses/Presentation/view/CourseDetailsPage.d
 import 'dart:async';
 import '../../../../Courses/Presentation/viewmodel/courseViewModel.dart';
 import '../../../../Courses/Presentation/widgets/CourseCard.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class CoursesPage extends ConsumerStatefulWidget {
   const CoursesPage({Key? key}) : super(key: key);
@@ -15,7 +16,7 @@ class CoursesPage extends ConsumerStatefulWidget {
 class _CoursesPageState extends ConsumerState<CoursesPage> {
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
   late ScrollController _scrollController;
-  bool _isLoading=false;
+  bool _isLoading = false;
   late TextEditingController _searchController;
   String _searchQuery = '';
 
@@ -26,35 +27,33 @@ class _CoursesPageState extends ConsumerState<CoursesPage> {
     _scrollController.addListener(_onScroll);
     _searchController = TextEditingController();
     _searchController.addListener(_debounceSearchChanged);
-
   }
 
   @override
   void dispose() {
     _searchController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
-
-
 
   void _onScroll() {
     if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent) {
       _loadMoreCourses();
     }
   }
+
   Future<void> _loadMoreCourses() async {
+    final courseState = ref.read(courseViewModelProvider);
+    if (_isLoading || courseState.hasReachedMax) return; // Prevent multiple loads or loading when no more courses are available
     setState(() {
       _isLoading = true;
     });
-    await Future.delayed(const Duration(seconds: 2));
-    if (mounted) { // Check if the widget is still mounted
-      // ref.read(courseViewModelProvider.notifier).loadMoreCourses();
-      _refreshIndicatorKey.currentState?.show();
-    }
+    await ref.read(courseViewModelProvider.notifier).getCourses();
     setState(() {
       _isLoading = false;
     });
   }
+
   void _debounceSearchChanged() {
     Future.delayed(const Duration(milliseconds: 300), () {
       if (_searchController.text == _searchQuery) return; // Prevent unnecessary rebuilds
@@ -64,14 +63,16 @@ class _CoursesPageState extends ConsumerState<CoursesPage> {
     });
   }
 
+  Future<void> _refreshCourses() async {
+    await ref.read(courseViewModelProvider.notifier).getCourses();
+  }
 
   @override
   Widget build(BuildContext context) {
     final courseState = ref.watch(courseViewModelProvider);
-    final filteredCourses=courseState.courses.where((course){
+    final filteredCourses = courseState.courses.where((course) {
       return course.title.toLowerCase().contains(_searchQuery.toLowerCase());
     }).toList();
-
 
     return Scaffold(
       appBar: AppBar(
@@ -112,7 +113,7 @@ class _CoursesPageState extends ConsumerState<CoursesPage> {
       ),
       body: RefreshIndicator(
         key: _refreshIndicatorKey,
-        onRefresh: _loadMoreCourses,
+        onRefresh: _refreshCourses,
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -120,7 +121,6 @@ class _CoursesPageState extends ConsumerState<CoursesPage> {
             children: [
               // Search Bar
               Container(
-
                 margin: const EdgeInsets.only(bottom: 20.0),
                 child: TextField(
                   controller: _searchController,
@@ -150,16 +150,23 @@ class _CoursesPageState extends ConsumerState<CoursesPage> {
 
               // List of Courses
               Expanded(
-                child: courseState.isLoading
-                    ? Center(child: CircularProgressIndicator())
-                    : courseState.error != null
-                    ? Center(child: Text('Error: ${courseState.error}'))
-                    : courseState.courses == null || courseState.courses!.isEmpty
-                    ? Center(child: Text('No courses found.'))
-                    : ListView.builder(
+                child: ListView.builder(
                   controller: _scrollController,
-                  itemCount: filteredCourses.length,
+                  itemCount: filteredCourses.length + (_isLoading ? 1 : 0),
                   itemBuilder: (context, index) {
+                    if (index >= filteredCourses.length) {
+                      // Show a loading indicator at the bottom if more courses are being fetched
+                      return Center(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 20),
+                          child: LoadingAnimationWidget.twistingDots(
+                            leftDotColor: const Color(0xFF1A1A3F),
+                            rightDotColor: const Color(0xFFEA3799),
+                            size: 50,
+                          ),
+                        ),
+                      );
+                    }
                     final course = filteredCourses[index];
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 20.0),
@@ -172,7 +179,12 @@ class _CoursesPageState extends ConsumerState<CoursesPage> {
                         level: course.level,
                         creator: course.createdBy.name,
                         onEnroll: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (context)=> CourseDetailsPage(course: course)));
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CourseDetailsPage(course: course),
+                            ),
+                          );
                         },
                       ),
                     );

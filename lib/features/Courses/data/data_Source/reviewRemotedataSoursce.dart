@@ -48,7 +48,7 @@ try{
 }
   }
 
-  Future<Either<Failure,bool>> addreview(String courseId,String comment,int rating)async{
+  Future<Either<Failure,ReviewModel>> addreview(String courseId,String comment,int rating)async{
     try{
       final token = await userSharedPrefs.getUserToken();
       final authToken = token.fold(
@@ -65,7 +65,12 @@ try{
           'Authorization': 'Bearer $authToken',
         },
       ), );
-      return right(true);
+      if(response.statusCode==201){
+        final ReviewModel review=ReviewModel.fromJson(response.data);
+        return right(review);
+      }else{
+        return left(Failure(error: "review not found"));
+      }
       
     }on DioException catch(e){
       return left(Failure(error: e.error.toString()));

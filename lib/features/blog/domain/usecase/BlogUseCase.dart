@@ -13,8 +13,8 @@ final blogUseCaseProvider=Provider.autoDispose<BlogUseCase>(
 class BlogUseCase{
   final BlogRepository blogRepository;
   BlogUseCase(this.blogRepository);
-  Future<Either<Failure, List<BlogModel>>> getBlogs()async{
-    return await blogRepository.getBlogs();
+  Future<Either<Failure, List<BlogModel>>> getBlogs({required int page, required int limit})async{
+    return await blogRepository.getBlogs(page: page, limit: limit);
 
   }
 }

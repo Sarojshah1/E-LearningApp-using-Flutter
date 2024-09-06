@@ -27,9 +27,9 @@ CommentModel _$CommentModelFromJson(Map<String, dynamic> json) => CommentModel(
   userId: UserModel.fromJson(json['user_id'] as Map<String, dynamic>),
   content: json['content'] as String,
   createdAt: DateTime.parse(json['created_at'] as String),
-  replies: (json['replies'] as List<dynamic>)
-      .map((e) => CommentReplyModel.fromJson(e as Map<String, dynamic>))
-      .toList(),
+  replies: (json['replies'] as List<dynamic>?)
+      ?.map((e) => CommentReplyModel.fromJson(e as Map<String, dynamic>))
+      .toList() ?? [],
 );
 
 Map<String, dynamic> _$CommentModelToJson(CommentModel instance) =>
@@ -38,7 +38,7 @@ Map<String, dynamic> _$CommentModelToJson(CommentModel instance) =>
       'user_id': instance.userId,
       'content': instance.content,
       'created_at': instance.createdAt.toIso8601String(),
-      'replies': instance.replies.map((e) => e.toJson()).toList(),
+      'replies': instance.replies!.map((e) => e.toJson()).toList(),
     };
 
 ForumPostModel _$ForumPostModelFromJson(Map<String, dynamic> json) =>

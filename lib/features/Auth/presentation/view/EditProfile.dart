@@ -5,7 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../domain/Entity/UserEntity.dart';
 import '../viewModel/userViewModel.dart';
-
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 class EditProfilePage extends ConsumerStatefulWidget {
   const EditProfilePage({Key? key}) : super(key: key);
 
@@ -49,7 +49,13 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
     final userDetail = userState.user;
 
     if (userDetail == null) {
-      return const Center(child: CircularProgressIndicator());
+      return Center(
+        child: LoadingAnimationWidget.twistingDots(
+          leftDotColor: const Color(0xFF1A1A3F),
+          rightDotColor: const Color(0xFFEA3799),
+          size: 50,
+        ),
+      );
     }
 
     _name ??= userDetail.name;
