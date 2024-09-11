@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:llearning/App/constants/formatdate.dart';
+
 
 class CertificateDetailsPage extends StatelessWidget {
   final String badge;
@@ -17,7 +18,7 @@ class CertificateDetailsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String formattedDate = DateFormat('MMM d, yyyy').format(issuedDate);
+    String formattedDate = FormatDate.formatDateOnly(issuedDate);
 
     return Scaffold(
       appBar: AppBar(

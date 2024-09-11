@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:llearning/App/constants/formatdate.dart';
 import 'CertificateDetailsPage.dart';
 
 class CertificateCard extends StatefulWidget {
@@ -26,7 +26,7 @@ class _CertificateCardState extends State<CertificateCard> {
   @override
   Widget build(BuildContext context) {
     // Format the issued date
-    String formattedDate = DateFormat('MMM d, yyyy').format(widget.issuedDate);
+    String formattedDate = FormatDate.formatDateOnly(widget.issuedDate);
 
     return GestureDetector(
       onTap: () {

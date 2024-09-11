@@ -58,8 +58,8 @@ class _HomeViewState extends ConsumerState<HomeView> {
           decoration: const BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                Colors.blueAccent,
-                Colors.lightBlueAccent,
+                Colors.deepPurple,
+                Colors.purpleAccent,
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
@@ -67,7 +67,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
           ),
         ),
         elevation: 10,
-        shadowColor: Colors.blueAccent.withOpacity(0.5),
+        shadowColor: Colors.purpleAccent.withOpacity(0.5),
       ),
       body: _pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
@@ -94,7 +94,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
           ),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: Colors.blueAccent,
+        selectedItemColor: Colors.deepPurple,
         unselectedItemColor: Colors.grey,
         backgroundColor: Colors.white,
         onTap: _onItemTapped,

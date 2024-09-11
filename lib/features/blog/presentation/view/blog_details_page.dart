@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:dio/dio.dart';
+import 'package:llearning/App/constants/formatdate.dart';
 import 'package:path_provider/path_provider.dart';
 import '../../data/model/blog_model.dart';
 
@@ -122,14 +123,14 @@ class _BlogDetailPageState extends State<BlogDetailPage> {
                     const Icon(Icons.calendar_today, size: 16, color: Colors.black54),
                     const SizedBox(width: 4),
                     Text(
-                      _formatDate(widget.blog.createdAt),
+                      FormatDate.formatDateOnly(widget.blog.createdAt),
                       style: const TextStyle(fontSize: 16, color: Colors.black54),
                     ),
                     const SizedBox(width: 16),
                     const Icon(Icons.access_time, size: 16, color: Colors.black54),
                     const SizedBox(width: 4),
                     Text(
-                      '${_calculateReadingTime(widget.blog.content)} min read',
+                      '1 hrs read',
                       style: const TextStyle(fontSize: 16, color: Colors.black54),
                     ),
                   ],
@@ -159,15 +160,10 @@ class _BlogDetailPageState extends State<BlogDetailPage> {
       ),
     );
   }
-
-  String _formatDate(DateTime date) {
-    // Format the date as needed, e.g., 'MMM dd, yyyy'
-    return '${date.day}/${date.month}/${date.year}';
-  }
+  
 
   int _calculateReadingTime(String content) {
-    // Calculate reading time based on the length of the content
-    // Assuming an average reading speed of 200 words per minute
+    
     final words = content.split(' ').length;
     return (words / 200).ceil();
   }

@@ -1,8 +1,9 @@
 import 'dart:io';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:lottie/lottie.dart';
 import '../../domain/Entity/UserEntity.dart';
 import '../viewModel/userViewModel.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
@@ -36,11 +37,59 @@ class _EditProfilePageState extends ConsumerState<EditProfilePage> {
         role: 'student', // Set the role as required
       );
 
-      final viewModel = ref.read(authViewModelProvider.notifier);
+      final viewModel = await ref.read(authViewModelProvider.notifier).updateUserDetails(user);
 
-      final result = await viewModel.updateUserDetails(user);
+      if(viewModel){
+        _showProfileUpdatedDialog();
+
+      }else{
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to update profile!')),
+        );
+      }
+
 
     }
+  }
+  void _showProfileUpdatedDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: Colors.blueGrey[200],
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Lottie.asset(
+                'assets/updated.json',
+                width: 300,
+                height: 200,
+                repeat: false,
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'Profile Updated!',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 10),
+              const Text(
+                'Your profile details have been successfully updated.',
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('OK', style: TextStyle(color: Colors.deepPurpleAccent)),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override

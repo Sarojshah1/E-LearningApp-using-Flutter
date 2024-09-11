@@ -166,10 +166,6 @@ class _BlogPageState extends ConsumerState<BlogPage> {
                   ),
                 )
 
-                  : blogState.error != null
-                    ? Center(child: Text('Error: ${blogState.error}'))
-                    : filteredBlogs.isEmpty
-                    ? Center(child: Text('No blogs found.'))
                     : ListView.builder(
                   controller: _scrollController,
                   itemCount: filteredBlogs.length + (_isLoading ? 1 : 0),

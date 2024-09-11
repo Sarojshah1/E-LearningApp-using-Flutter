@@ -43,12 +43,18 @@ class UserViewModel extends StateNotifier<UserState>{
     );
   }
 
-  Future<void> updateUserDetails(UserEntity user) async {
+  Future<bool> updateUserDetails(UserEntity user) async {
     state = state.copyWith(isLoading: true);
     final result = await userUseCase.updateUserDetails(user);
-    result.fold(
-          (failure) => state = state.copyWith(isLoading: false, error: failure.error),
-          (success) => state = state.copyWith(isLoading: false),
+    return result.fold(
+          (failure) {
+        state = state.copyWith(isLoading: false, error: failure.error);
+        return false;
+      },
+          (success) {
+        state = state.copyWith(isLoading: false,error: null);
+        return true;
+      },
     );
   }
 

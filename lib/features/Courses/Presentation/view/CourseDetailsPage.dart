@@ -1,12 +1,14 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:llearning/App/constants/formatdate.dart';
 import 'package:llearning/features/Courses/data/model/ReviewModel.dart';
 import 'package:llearning/features/Courses/data/model/course_model.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../viewmodel/reviewViewModel.dart';
+import 'PaymentPage.dart';
 
 class CourseDetailsPage extends ConsumerStatefulWidget {
   final CourseModel course;
@@ -36,7 +38,7 @@ class _CourseDetailsPageState extends ConsumerState<CourseDetailsPage> {
 
 
   void _handleBuyNow() {
-    Navigator.pushNamed(context, '/payments', arguments: widget.course);
+    Navigator.push(context, MaterialPageRoute(builder: (context)=>PaymentPage(course: widget.course)));
   }
 
   void _submitReview() async{
@@ -189,7 +191,7 @@ class _CourseDetailsPageState extends ConsumerState<CourseDetailsPage> {
             children: [
               Icon(Icons.calendar_today, color: Colors.purple, size: 20),
               SizedBox(width: 8),
-              Expanded(child: Text('Created Date: ${course.createdAt}')),
+              Expanded(child: Text('Created Date: ${FormatDate.formatDateOnly(course.createdAt)}')),
             ],
           ),
           SizedBox(height: 8),
@@ -339,7 +341,7 @@ class _CourseDetailsPageState extends ConsumerState<CourseDetailsPage> {
                           ),
                           SizedBox(width: 10),
                           Text(
-                            review.createdAt.toString(),
+                           FormatDate.formatDateOnly( review.createdAt),
                             style: TextStyle(fontSize: 14, color: Colors.grey),
                           ),
                         ],

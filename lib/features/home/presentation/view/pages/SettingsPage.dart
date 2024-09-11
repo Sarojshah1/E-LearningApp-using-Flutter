@@ -6,6 +6,7 @@ import 'package:llearning/features/Settings/presentation/view/AboutUs.dart';
 import 'package:llearning/features/profile/presentation/view/SecurityPage.dart';
 import '../../../../../cores/shared_pref/user_shared_pref.dart';
 import '../../../../Settings/presentation/view/ContactUsPage.dart';
+import '../../../../Settings/presentation/view/PrivacyPolicyPage.dart';
 import '../../../../profile/presentation/view/NotificationsPage.dart';
 
 final userSharedPrefsProvider = Provider<UserSharedPrefs>((ref) {
@@ -39,12 +40,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Settings', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        title: const Text('Settings', style: TextStyle(fontSize: 20,color: Colors.white, fontWeight: FontWeight.bold)),
         centerTitle: true,
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: [Colors.teal, Colors.blueAccent],
+              colors: [Colors.purple, Colors.indigo],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -79,7 +80,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 ),
                 Divider(height: 1, color: Colors.grey[300]),
                 ListTile(
-                  leading: const Icon(Icons.language, color: Colors.teal),
+                  leading: const Icon(Icons.language, color: Colors.purple),
                   title: const Text('Language'),
                   subtitle: const Text('Select your preferred language'),
                   trailing: DropdownButton<String>(
@@ -105,7 +106,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             _buildCard(
               children: [
                 ListTile(
-                  leading: const Icon(Icons.notifications, color: Colors.teal),
+                  leading: const Icon(Icons.notifications, color: Colors.purple),
                   title: const Text('Notifications'),
                   subtitle: const Text('Manage notifications for Courses and grades'),
                   onTap: () {
@@ -114,7 +115,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 ),
                 Divider(height: 1, color: Colors.grey[300]),
                 ListTile(
-                  leading: const Icon(Icons.lock, color: Colors.teal),
+                  leading: const Icon(Icons.lock, color: Colors.purple),
                   title: const Text('Change Password'),
                   subtitle: const Text('Update your account password'),
                   onTap: () {
@@ -123,16 +124,16 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 ),
                 Divider(height: 1, color: Colors.grey[300]),
                 ListTile(
-                  leading: const Icon(Icons.privacy_tip, color: Colors.teal),
+                  leading: const Icon(Icons.privacy_tip, color: Colors.purple),
                   title: const Text('Privacy'),
                   subtitle: const Text('Review and update privacy settings'),
                   onTap: () {
-                    // Navigate to privacy settings page
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=>PrivacyPolicyPage()));
                   },
                 ),
                 Divider(height: 1, color: Colors.grey[300]),
                 ListTile(
-                  leading: const Icon(Icons.security, color: Colors.teal),
+                  leading: const Icon(Icons.security, color: Colors.purple),
                   title: const Text('Security'),
                   subtitle: const Text('Manage security settings'),
                   onTap: () {
@@ -145,7 +146,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             _buildCard(
               children: [
                 ListTile(
-                  leading: const Icon(Icons.info, color: Colors.teal),
+                  leading: const Icon(Icons.info, color: Colors.purple),
                   title: const Text('About Us'),
                   subtitle: const Text('Learn more about our platform'),
                   onTap: () {
@@ -154,7 +155,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 ),
                 Divider(height: 1, color: Colors.grey[300]),
                 ListTile(
-                  leading: const Icon(Icons.contact_mail, color: Colors.teal),
+                  leading: const Icon(Icons.contact_mail, color: Colors.purple),
                   title: const Text('Contact Us'),
                   subtitle: const Text('Reach out to support for help'),
                   onTap: () {

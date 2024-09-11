@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:llearning/App/constants/formatdate.dart';
 import 'package:llearning/features/home/data/models/user_quiz_result_model.dart';
 
 class QuizResultsPage extends StatelessWidget {
@@ -47,7 +47,7 @@ class QuizResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String formattedDate = DateFormat('MMM d, yyyy').format(result.attemptedAt);
+    String formattedDate = FormatDate.formatDateOnly(result.attemptedAt);
     double scorePercentage = result.score.toDouble();  // Assuming score is out of 100
 
     return Card(

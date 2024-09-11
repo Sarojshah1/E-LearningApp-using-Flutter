@@ -4,7 +4,10 @@ import 'package:llearning/features/FourmPosts/data/model/ForumPostModel.dart';
 import 'package:llearning/features/FourmPosts/presentation/view/CreatePostPage.dart';
 import 'package:llearning/features/FourmPosts/presentation/viewmodel/postViewModel.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-class ForumPostPage extends ConsumerStatefulWidget {
+import 'package:google_fonts/google_fonts.dart';
+
+import '../../../../FourmPosts/presentation/widgets/MyAppBar.dart';
+class ForumPostPage extends ConsumerStatefulWidget  {
   @override
   _ForumPostPageState createState() => _ForumPostPageState();
 }
@@ -56,11 +59,6 @@ class _ForumPostPageState extends ConsumerState<ForumPostPage> {
   }
 
 
-  void _createPost() {
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => CreatePostPage()));
-  }
-
   Future<void> _refreshPosts() async {
     await ref.read(postViewModelProvider.notifier).getPost();
   }
@@ -73,31 +71,21 @@ class _ForumPostPageState extends ConsumerState<ForumPostPage> {
       ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Forum Posts'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.add),
-            onPressed: _createPost,
-            tooltip: 'Create Post',
-          ),
-        ],
+      appBar: MyAppBar(
+        onCreatePost: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => CreatePostPage()),
+          );
+        },
       ),
       body: RefreshIndicator(
         key: _refreshIndicatorKey,
         onRefresh: _refreshPosts,
-        child:_isInitialLoad
-            ? Center(
-          child: LoadingAnimationWidget.twistingDots(
-            leftDotColor: const Color(0xFF1A1A3F),
-            rightDotColor: const Color(0xFFEA3799),
-            size: 50,
-          ),
-        )
-            :  ListView.builder(
+        child: ListView.builder(
           controller: _scrollController,
           padding: EdgeInsets.all(8.0),
-          itemCount:sortedPosts.length,
+          itemCount:sortedPosts.length + (_isLoading ? 1 : 0),
           itemBuilder: (context, index) {
             if (index >= sortedPosts.length) {
 
@@ -112,7 +100,8 @@ class _ForumPostPageState extends ConsumerState<ForumPostPage> {
                 ),
               );
             }
-            return PostWidget(post: sortedPosts[index]);
+            final post=sortedPosts[index];
+            return PostWidget(post: post);
           },
         ),
       ),
@@ -140,12 +129,13 @@ class _PostWidgetState extends ConsumerState<PostWidget> {
 
   @override
   void initState() {
+    final comments = widget.post.comments ?? [];
     super.initState();
     _showReplies = {
-      for (int i = 0; i < (widget.post.comments?.length ?? 0); i++) i: false,
+      for (int i = 0; i < (widget.post.comments.length ?? 0); i++) i: false,
     };
     _replyControllers = {
-      for (int i = 0; i < (widget.post.comments?.length ?? 0); i++) i: TextEditingController(),
+      for (int i = 0; i < (widget.post.comments.length ?? 0); i++) i: TextEditingController(),
     };
   }
 
@@ -158,7 +148,7 @@ class _PostWidgetState extends ConsumerState<PostWidget> {
 
   void _toggleReplies(int index) {
     setState(() {
-      _showReplies[index] = !_showReplies[index]!;
+      _showReplies[index] = !(_showReplies[index] ?? false);
     });
   }
 
@@ -193,16 +183,20 @@ class _PostWidgetState extends ConsumerState<PostWidget> {
   }
 
   void _addReply(int commentIndex, String commentId) async {
-    if (_replyControllers[commentIndex]!.text.isNotEmpty) {
-      final newReplyText = _replyControllers[commentIndex]!.text;
-      final viewModel = ref.read(postViewModelProvider.notifier);
-      await viewModel.addCommentReply(
-          widget.post.id, commentId, newReplyText);
-      setState(() {
+    final replyController = _replyControllers[commentIndex];
 
-        _replyControllers[commentIndex]!.clear();
-        _showReplies[commentIndex] = false; // Hide replies after adding
+    // Ensure the replyController and its text are not null
+    if (replyController != null && replyController.text.isNotEmpty) {
+      final newReplyText = replyController.text;
+      final viewModel = ref.read(postViewModelProvider.notifier);
+      await viewModel.addCommentReply(widget.post.id, commentId, newReplyText);
+      setState(() {
+        replyController.clear();
       });
+      print('Reply added. Current post state: ${viewModel.state.forumPosts}');
+    } else {
+      // Handle the case where replyController is null or text is empty
+      print('ReplyController is null or text is empty.');
     }
   }
 
@@ -225,298 +219,327 @@ class _PostWidgetState extends ConsumerState<PostWidget> {
     final post = postState.forumPosts
         .firstWhere((p) => p.id == widget.post.id, orElse: () => widget.post);
     final formattedDate = _formatDate(widget.post.createdAt);
-    final totalComments = post.comments?.length ?? 0;
-    final totalLikes=post.likes.length;
-    print(post.comments);
+    final totalComments = post.comments.length ?? 0;
+    final totalLikes = post.likes.length;
 
     return Card(
       margin: EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
-      elevation: 6.0,
+      elevation: 6,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16.0),
+        borderRadius: BorderRadius.circular(20.0),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Poster Info
-            Row(
-              children: [
-                CircleAvatar(
-                  backgroundImage: NetworkImage(
-                      "http://10.0.2.2:3000/profile/${widget.post.userId.profilePicture}"),
-                  radius: 24.0,
-                ),
-                SizedBox(width: 8.0),
-                Expanded(
-                  child: Text(
-                    widget.post.userId.name,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: Colors.deepPurple,
-                    ),
-                  ),
-                ),
-                SizedBox(width: 8.0),
-                Icon(
-                  Icons.star,
-                  color: Colors.yellow[700],
-                ),
-              ],
-            ),
-            SizedBox(height: 8.0),
-            Text(
-              formattedDate,
-              style: TextStyle(color: Colors.grey, fontSize: 12),
-            ),
-            SizedBox(height: 8.0),
-            Text(
-              widget.post.title,
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.deepPurple,
-              ),
-            ),
-            SizedBox(height: 8.0),
-            Text(
-              widget.post.content,
-              style: TextStyle(fontSize: 16, color: Colors.black87),
-            ),
-            SizedBox(height: 12.0),
-            Wrap(
-              spacing: 8.0,
-              children: widget.post.tags
-                  .map(
-                    (tag) => Chip(
-                  label: Text(tag),
-                  backgroundColor: Colors.blueAccent.withOpacity(0.1),
-                  labelStyle: TextStyle(color: Colors.blueAccent),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20.0),
-                  ),
-                ),
-              )
-                  .toList(),
-            ),
-            SizedBox(height: 12.0),
-            Row(
-              children: [
-                IconButton(
-                  icon: Icon(
-                    _isLiked ? Icons.thumb_up : Icons.thumb_up_outlined,
-                    color: _isLiked ? Colors.blue : Colors.grey,
-                  ),
-                  onPressed: _likePost,
-                ),
-                SizedBox(width: 4.0),
-                Text('$totalLikes', style: TextStyle(fontSize: 16)),
-                SizedBox(width: 16.0),
-                GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _showComments = !_showComments;
-                    });
-                  },
-                  child: Row(
-                    children: [
-                      Icon(Icons.comment, size: 18, color: Colors.blue),
-                      SizedBox(width: 4.0),
-                      Text(
-                        _showComments
-                            ? 'Hide Comments'
-                            : 'Show Comments ($totalComments)',
-                        style: TextStyle(color: Colors.blue, fontSize: 14),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 12.0),
-            if (_showComments)
-
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  for (int i = (totalComments - 1);
-                  i >= 0 && i >= totalComments - _commentsToShow; i--)
-
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 12.0),
-                      child: Container(
-                        padding: EdgeInsets.all(16.0),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[100],
-                          borderRadius: BorderRadius.circular(12.0),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 6.0,
-                              offset: Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                CircleAvatar(
-                                  backgroundImage: NetworkImage(
-                                      "http://10.0.2.2:3000/profile/${widget.post.comments![i].userId.profilePicture}"
-                                  ),
-                                  radius: 18.0,
-                                ),
-                                SizedBox(width: 8.0),
-                                Expanded(
-                                  child: Text(
-                                    post.comments[i].userId.name,
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 14,
-                                      color: Colors.deepPurple,
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(width: 8.0),
-                                Text(
-                                  _formatDate(widget.post.comments[i].createdAt),
-                                  style: TextStyle(color: Colors.grey, fontSize: 12),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 8.0),
-                            Text(
-                              post.comments![i].content,
-                              style: TextStyle(color: Colors.black87, fontSize: 14),
-                            ),
-                            SizedBox(height: 8.0),
-                            if (_showReplies[i] ?? false)
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  for (var reply in post.comments![i].replies ?? [])
-                                    Padding(
-                                      padding: const EdgeInsets.only(bottom: 8.0),
-                                      child: Container(
-                                        padding: EdgeInsets.all(12.0),
-                                        decoration: BoxDecoration(
-                                          color: Colors.grey[200],
-                                          borderRadius: BorderRadius.circular(8.0),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.black.withOpacity(0.1),
-                                              blurRadius: 4.0,
-                                              offset: Offset(0, 2),
-                                            ),
-                                          ],
-                                        ),
-                                        child: Row(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            CircleAvatar(
-                                              backgroundImage: NetworkImage(
-                                                  "http://10.0.2.2:3000/profile/${reply.userId.profilePicture}"
-                                              ),
-                                              radius: 18.0,
-                                            ),
-                                            SizedBox(width: 8.0),
-                                            Expanded(
-                                              child: Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    reply.userId.name,
-                                                    style: TextStyle(
-                                                      fontWeight: FontWeight.bold,
-                                                      fontSize: 14,
-                                                      color: Colors.deepPurple,
-                                                    ),
-                                                  ),
-                                                  SizedBox(height: 4.0),
-                                                  Text(
-                                                    reply.content,
-                                                    style: TextStyle(color: Colors.black87, fontSize: 14),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            TextButton(
-                              onPressed: () => _toggleReplies(i),
-                              child: Text(
-                                _showReplies[i] ??false ? 'Hide Replies' : 'Show Replies (${post.comments![i].replies?.length ?? 0})',
-                                style: TextStyle(color: Colors.blue, fontSize: 14),
-                              ),
-                            ),
-                            if (_showReplies[i] ?? false)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 8.0),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: TextField(
-                                        controller: _replyControllers[i],
-                                        decoration: InputDecoration(
-                                          hintText: 'Write a reply...',
-                                          filled: true,
-                                          fillColor: Colors.grey[200],
-                                          border: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(8.0),
-                                            borderSide: BorderSide.none,
-                                          ),
-                                          suffixIcon: IconButton(
-                                            icon: Icon(Icons.send),
-                                            onPressed: () => _addReply(i, post.comments![i].id),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  if (_commentsToShow < totalComments)
-                    Center(
-                      child: TextButton(
-                        onPressed: _loadMoreComments,
-                        child: Text('Load More', style: TextStyle(color: Colors.blue, fontSize: 14)),
-                      ),
-                    ),
-                ],
-              ),
-            SizedBox(height: 12.0),
-            TextField(
-              controller: _commentController,
-              decoration: InputDecoration(
-                hintText: 'Add a comment...',
-                filled: true,
-                fillColor: Colors.grey[200],
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                  borderSide: BorderSide.none,
-                ),
-                suffixIcon: IconButton(
-                  icon: Icon(Icons.send),
-                  onPressed: _addComment,
-                ),
-              ),
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.white, Colors.grey[100]!],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(20.0),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 10.0,
+              offset: Offset(0, 4),
             ),
           ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Poster Info
+              Row(
+                children: [
+                  CircleAvatar(
+                    backgroundImage: NetworkImage(
+                        "http://10.0.2.2:3000/profile/${widget.post.userId.profilePicture}"),
+                    radius: 30.0,
+                    backgroundColor: Colors.blueGrey[100],
+                  ),
+                  SizedBox(width: 12.0),
+                  Expanded(
+                    child: Text(
+                      widget.post.userId.name,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                        color: Colors.deepPurple[800],
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 8.0),
+                  Icon(
+                    Icons.star,
+                    color: Colors.yellow[700],
+                    size: 20,
+                  ),
+                ],
+              ),
+              SizedBox(height: 10.0),
+              Text(
+                formattedDate,
+                style: TextStyle(color: Colors.grey[600], fontSize: 14),
+              ),
+              SizedBox(height: 10.0),
+              Text(
+                widget.post.title,
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.deepPurple[800],
+                ),
+              ),
+              SizedBox(height: 10.0),
+              Container(
+                padding: EdgeInsets.all(12.0),
+                decoration: BoxDecoration(
+                  color: Colors.grey[50],
+                  borderRadius: BorderRadius.circular(12.0),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 8.0,
+                      offset: Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Text(
+                  widget.post.content,
+                  style: TextStyle(fontSize: 16, color: Colors.black87),
+                ),
+              ),
+              SizedBox(height: 12.0),
+              Wrap(
+                spacing: 8.0,
+                children: widget.post.tags
+                    .map(
+                      (tag) => Chip(
+                    label: Text(tag),
+                    backgroundColor: Colors.blueAccent.withOpacity(0.1),
+                    labelStyle: TextStyle(color: Colors.blueAccent),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20.0),
+                    ),
+                  ),
+                )
+                    .toList(),
+              ),
+              SizedBox(height: 12.0),
+              Row(
+                children: [
+                  IconButton(
+                    icon: Icon(
+                      _isLiked ? Icons.thumb_up : Icons.thumb_up_outlined,
+                      color: _isLiked ? Colors.blue : Colors.grey,
+                      size: 28,
+                    ),
+                    onPressed: _likePost,
+                  ),
+                  SizedBox(width: 8.0),
+                  Text('$totalLikes', style: TextStyle(fontSize: 18)),
+                  SizedBox(width: 32.0),
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _showComments = !_showComments;
+                      });
+                    },
+                    child: Row(
+                      children: [
+                        Icon(Icons.comment, size: 28, color: Colors.blue),
+                        SizedBox(width: 8.0),
+                        Text(
+                          _showComments
+                              ? 'Hide Comments'
+                              : 'Show Comments ($totalComments)',
+                          style: TextStyle(color: Colors.blue, fontSize: 16),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 12.0),
+              if (_showComments)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    for (int i = (totalComments - 1);
+                    i >= 0 && i >= totalComments - _commentsToShow; i--)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 12.0),
+                        child: Container(
+                          padding: EdgeInsets.all(16.0),
+                          margin: EdgeInsets.symmetric(vertical: 8.0),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[200],
+                            borderRadius: BorderRadius.circular(12.0),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.1),
+                                blurRadius: 6.0,
+                                offset: Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  CircleAvatar(
+                                    backgroundImage: NetworkImage(
+                                        "http://10.0.2.2:3000/profile/${widget.post.comments![i].userId.profilePicture}"
+                                    ),
+                                    radius: 24.0,
+                                  ),
+                                  SizedBox(width: 12.0),
+                                  Expanded(
+                                    child: Text(
+                                      post.comments[i].userId.name,
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                        color: Colors.deepPurple[800],
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(width: 8.0),
+
+                                ],
+                              ),
+                              Text(
+                                _formatDate(widget.post.comments[i].createdAt),
+                                style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                              ),
+                              SizedBox(height: 8.0),
+                              Text(
+                                post.comments[i].content,
+                                style: TextStyle(color: Colors.black87, fontSize: 16),
+                              ),
+                              SizedBox(height: 8.0),
+                              if (_showReplies[i] ?? false)
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    for (var reply in widget.post.comments[i].replies ?? [])
+                                      Padding(
+                                        padding: const EdgeInsets.only(bottom: 8.0),
+                                        child: Container(
+                                          padding: EdgeInsets.all(12.0),
+                                          decoration: BoxDecoration(
+                                            color: Colors.grey[100],
+                                            borderRadius: BorderRadius.circular(8.0),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.black.withOpacity(0.1),
+                                                blurRadius: 4.0,
+                                                offset: Offset(0, 2),
+                                              ),
+                                            ],
+                                          ),
+                                          child: Row(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              CircleAvatar(
+                                                backgroundImage: NetworkImage(
+                                                    "http://10.0.2.2:3000/profile/${reply.userId.profilePicture}"
+                                                ),
+                                                radius: 24.0,
+                                              ),
+                                              SizedBox(width: 12.0),
+                                              Expanded(
+                                                child: Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      reply.userId.name,
+                                                      style: TextStyle(
+                                                        fontWeight: FontWeight.bold,
+                                                        fontSize: 16,
+                                                        color: Colors.deepPurple[800],
+                                                      ),
+                                                    ),
+                                                    SizedBox(height: 4.0),
+                                                    Text(
+                                                      reply.content,
+                                                      style: TextStyle(color: Colors.black87, fontSize: 16),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              TextButton(
+                                onPressed: () => _toggleReplies(i),
+                                child: Text(
+                                  _showReplies[i] ?? false ? 'Hide Replies' : 'Show Replies',
+                                  style: TextStyle(color: Colors.blue, fontSize: 14),
+                                ),
+                              ),
+                              SizedBox(height: 8.0),
+                              TextField(
+                              controller: _replyControllers[i],
+                              decoration: InputDecoration(
+                              hintText: 'Write a reply...',
+                              filled: true,
+                              fillColor: Colors.grey[200],
+                              border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8.0),
+                              borderSide: BorderSide.none,
+                              ),
+                              suffixIcon: IconButton(
+                              icon: Icon(Icons.send,color: Colors.deepPurple),
+                              onPressed: () => _addReply(i, post.comments[i].id),
+    ),
+    ),
+    ),
+
+                            ],
+                          ),
+                        ),
+                      ),
+                    if (totalComments > _commentsToShow)
+                      TextButton(
+                        onPressed: _loadMoreComments,
+                        child: Text('Load more comments'),
+                      ),
+                  ],
+                ),
+              SizedBox(height: 12.0),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+    controller: _commentController,
+    decoration: InputDecoration(
+    hintText: 'Add a comment...',
+    filled: true,
+    fillColor: Colors.grey[200],
+    border: OutlineInputBorder(
+    borderRadius: BorderRadius.circular(8.0),
+    borderSide: BorderSide.none,
+    ),
+    suffixIcon: IconButton(
+    icon: Icon(Icons.send,color: Colors.deepPurple),
+    onPressed: _addComment,
+    ),
+    ),
+    ),)
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
+
 

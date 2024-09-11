@@ -167,7 +167,7 @@ class FormPostDataSource{
   }
 
 
-  Future<Either<Failure, CommentReplyModel>> addCommentReply(
+  Future<Either<Failure, ForumPostModel>> addCommentReply(
       String postId, String commentId, String content) async {
     try {
       final token = await userSharedPrefs.getUserToken();
@@ -189,46 +189,12 @@ class FormPostDataSource{
         ),
       );
 
-      // Check if the response is successful and contains the expected data
-      if (response.statusCode == 200 && response.data != null) {
-        // Ensure the response contains comments and replies
-        if (response.data['comments'] != null && response.data['comments'] is List) {
-          // Find the specific comment and its replies
-          final List comments = response.data['comments'];
-
-          // Find the target comment by its ID and extract replies
-          final targetComment = comments.firstWhere(
-                (comment) => comment['id'] == commentId,
-            orElse: () => null,
-          );
-
-          if (targetComment != null && targetComment['replies'] != null) {
-            final repliesList = targetComment['replies'] as List;
-
-            // Ensure there are replies and the last one is valid
-            if (repliesList.isNotEmpty) {
-              final replyData = repliesList.last;
-
-              // Check if reply data is in the correct format
-              if (replyData is Map<String, dynamic>) {
-                final CommentReplyModel model = CommentReplyModel.fromJson(replyData);
-                print("New CommentReplyModel: $model");
-                return right(model);
-              } else {
-                return left(Failure(error: "Reply data is not in the expected map format"));
-              }
-            } else {
-              return left(Failure(error: "No replies found in the comment"));
-            }
-          } else {
-            return left(Failure(error: "Comment not found or missing replies"));
-          }
-        } else {
-          return left(Failure(error: "Invalid comments data format in the response"));
-        }
-      } else {
-        return left(Failure(error: "Failed to add reply, unexpected server response"));
-      }
+     if(response.statusCode==201){
+       final ForumPostModel model=ForumPostModel.fromJson(response.data);
+       return right(model);
+     }else{
+       return left(Failure(error: "failed to load data"));
+     }
     } on DioException catch (e) {
       return left(Failure(error: e.error.toString()));
     }

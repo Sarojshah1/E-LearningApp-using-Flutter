@@ -25,7 +25,7 @@ class PostUseCase{
   Future<Either<Failure, CommentModel>> addComment(String postId, String content)async{
     return await repository.addComment(postId, content);
   }
-  Future<Either<Failure,CommentReplyModel>> addCommentReply(String postId,String commentId,String content)async{
+  Future<Either<Failure,ForumPostModel>> addCommentReply(String postId,String commentId,String content)async{
     return await repository.addCommentReply(postId, commentId, content);
   }
 }

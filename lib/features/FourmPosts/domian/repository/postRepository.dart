@@ -8,5 +8,5 @@ abstract class PostRepository{
   Future<Either<Failure,List<ForumPostModel>>> getPost({required int page, required int limit});
   Future<Either<Failure,List<String>>> addlike(String postId);
   Future<Either<Failure,CommentModel>> addComment(String postId,String content);
-  Future<Either<Failure,CommentReplyModel>> addCommentReply(String postId,String commentId,String content);
+  Future<Either<Failure,ForumPostModel>> addCommentReply(String postId,String commentId,String content);
 }

@@ -63,8 +63,12 @@ dependencies:
   font_awesome_flutter: ^10.7.0
   cached_network_image: ^3.3.1
   maps_launcher: ^2.2.1
-  khalti_flutter: ^3.0.0
+#  khalti_flutter: ^3.0.0
+  webview_flutter: ^4.8.0
+  flutter_paypal: ^0.2.1
   lottie: ^3.1.2
+  google_fonts: ^6.2.1
+
   loading_animation_widget: ^1.2.1
 
   http:
@@ -104,6 +108,7 @@ flutter:
     - assets/
     - assets/icons/
     - assets/images/
+    - assets/updated.json
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

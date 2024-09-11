@@ -41,7 +41,7 @@ class PostRepositoryImpl extends PostRepository{
     return await dataSource.addComment(postId, content);
   }
   @override
-  Future<Either<Failure, CommentReplyModel>> addCommentReply(String postId, String commentId, String content) async{
+  Future<Either<Failure, ForumPostModel>> addCommentReply(String postId, String commentId, String content) async{
     return await dataSource.addCommentReply(postId, commentId, content);
   }
 }

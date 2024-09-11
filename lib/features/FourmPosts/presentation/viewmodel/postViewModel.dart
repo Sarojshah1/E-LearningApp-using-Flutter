@@ -58,18 +58,15 @@ class PostViewModel extends StateNotifier<ForumPostState>{
 
   }
   Future<void> addComment(String postId,String content)async{
-    print("viewmodel:$content");
     state = state.copyWith(isLoading: true);
     final result=await useCase.addComment(postId, content);
 
     result.fold((failure)=>state=state.copyWith(isLoading: false,error: failure.error),
             (success){
-      print("viewmodel:${success.content}");
               final updatedPosts = state.forumPosts.map((post) {
                 if (post.id == postId) {
                   return post.copyWith(comments: [...post.comments, success]);
                 }
-                print(post.comments);
                 return post;
               }).toList();
       state=state.copyWith(isLoading: false,forumPosts: updatedPosts);
@@ -82,21 +79,7 @@ class PostViewModel extends StateNotifier<ForumPostState>{
     final result=await useCase.addCommentReply(postId, commentId, content);
     result.fold((failure)=>state=state.copyWith(isLoading: false,error: failure.error),
             (newReply){
-              final updatedPosts = state.forumPosts.map((post) {
-                if (post.id == postId) {
-                  final updatedComments = post.comments.map((comment) {
-                    if (comment.id == commentId) {
-                      return comment.copyWith(
-                        replies: List.from(comment.replies ?? [])..add(newReply),
-                      );
-                    }
-                    return comment;
-                  }).toList();
-
-                  return post.copyWith(comments: updatedComments);
-                }
-                return post;
-              }).toList();
+              final updatedPosts=[...state.forumPosts,newReply];
       state=state.copyWith(isLoading: false,forumPosts: updatedPosts);
             });
 
