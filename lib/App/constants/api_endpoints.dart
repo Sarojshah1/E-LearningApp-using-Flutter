@@ -17,6 +17,9 @@ class ApiEndpoints {
   static const String changePassword = "$baseUrl/user/change-password";
   static const String updateDetails = "$baseUrl/user/update-details";
   static const String updateProfilePicture = "$baseUrl/user/update-profile-picture";
+  static const String sendOtp="$baseUrl/otp";
+  static const String verifyOtp="$baseUrl/verify";
+  static const String ForgetPassword="$baseUrl/user/update-password-by-email";
 //   course routes
 static const String getCourses="$baseUrl/courses/pagination";
 // reviews
@@ -46,6 +49,25 @@ static const String getPost="$baseUrl/post";
   static String getpostcommentReplyUrl(String postId,String commentId) {
     return "$baseUrl/post/$postId/comments/$commentId/replies";
   }
+
+//   groups chats API'S
+  static const String createGroup="$baseUrl/groupstudy/create";
+  static const String getAllGroups="$baseUrl/groupstudy";
+  static String getGroupMemberUrl(String groupId) {
+    return "$baseUrl/groupstudy/$groupId/addMember";
+  }
+  static String getGroupChatUrl(String groupId) {
+    return "$baseUrl/groupstudy/$groupId/sendChat";
+  }
+  static String getGroupsUrl(String groupId) {
+    return "$baseUrl/groupstudy/$groupId/";
+  }
+  static String getUserGroupsUrl(String userId) {
+    return "$baseUrl/groupstudy/user/$userId";
+  }
+
+
+
 
 
 }

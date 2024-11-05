@@ -130,7 +130,7 @@ class _CourseCardState extends State<CourseCard> {
                       ),
                     ],
                   ),
-                  SizedBox(height: mediaQuery.size.width * 0.05), // Responsive spacing
+                  SizedBox(height: mediaQuery.size.width * 0.02),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [

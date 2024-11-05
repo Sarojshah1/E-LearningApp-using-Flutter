@@ -6,6 +6,8 @@ import 'package:llearning/features/home/presentation/view/pages/blog_page.dart';
 import 'package:llearning/features/home/presentation/view/pages/coursesPage.dart';
 import 'package:llearning/features/home/presentation/view/pages/dashboardPage.dart';
 
+import '../../../../App/app.dart';
+
 class HomeView extends ConsumerStatefulWidget {
   const HomeView({Key? key}) : super(key: key);
 
@@ -32,6 +34,8 @@ class _HomeViewState extends ConsumerState<HomeView> {
 
   @override
   Widget build(BuildContext context) {
+    final themeNotifier = ref.watch(themeNotifierProvider);
+    bool isDarkMode = themeNotifier.isDarkMode;
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -96,7 +100,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.deepPurple,
         unselectedItemColor: Colors.grey,
-        backgroundColor: Colors.white,
+        backgroundColor: isDarkMode ? Colors.black:Colors.white,
         onTap: _onItemTapped,
         type: BottomNavigationBarType.fixed,
       ),

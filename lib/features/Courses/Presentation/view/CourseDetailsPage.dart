@@ -252,7 +252,7 @@ class _CourseDetailsPageState extends ConsumerState<CourseDetailsPage> {
     double overallRating = sortedReviews.isNotEmpty
         ? reviews.map((r) => r.rating).reduce((a, b) => a + b) / reviews.length
         : 0;
-    final startIndex = visibleReviewCount * (_currentPage-1);
+    final startIndex = visibleReviewCount * (_currentPage);
     final endIndex = (startIndex + visibleReviewCount) > sortedReviews.length ? sortedReviews.length : (startIndex + visibleReviewCount);
     final visibleReviews = sortedReviews.sublist(startIndex , endIndex );
 

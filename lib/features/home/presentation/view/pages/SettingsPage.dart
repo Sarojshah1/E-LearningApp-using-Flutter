@@ -4,11 +4,15 @@ import 'package:llearning/features/Auth/presentation/view/ChangePasswordScreen.d
 import 'package:llearning/features/Auth/presentation/view/LoginView.dart';
 import 'package:llearning/features/Settings/presentation/view/AboutUs.dart';
 import 'package:llearning/features/profile/presentation/view/SecurityPage.dart';
+import '../../../../../App/app.dart';
+import '../../../../../cores/shared_pref/app_shared_pref.dart';
 import '../../../../../cores/shared_pref/user_shared_pref.dart';
 import '../../../../Settings/presentation/view/ContactUsPage.dart';
 import '../../../../Settings/presentation/view/PrivacyPolicyPage.dart';
 import '../../../../profile/presentation/view/NotificationsPage.dart';
-
+final AppSharedPrefsProvider = Provider<AppSharedPrefs>((ref) {
+  return AppSharedPrefs();
+});
 final userSharedPrefsProvider = Provider<UserSharedPrefs>((ref) {
   return UserSharedPrefs();
 });
@@ -23,6 +27,61 @@ class SettingsPage extends ConsumerStatefulWidget {
 class _SettingsPageState extends ConsumerState<SettingsPage> {
   bool _isDarkMode = false;
   String _selectedLanguage = 'English';
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    darkmode();
+
+  }
+  Future<void> darkmode() async{
+    final appSharedPrefs = ref.read(AppSharedPrefsProvider);
+    final result = await appSharedPrefs.getDarkMode();
+    result.fold(
+          (failure) {
+        // Handle failure case here if needed
+      },
+          (isDarkMode) {
+        setState(() {
+          _isDarkMode=isDarkMode ?? false;
+        });
+
+      },
+    );
+  }
+  Future<void> _confirmLogout() async {
+    final shouldLogout = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Confirm Logout'),
+        content: const Text('Are you sure you want to logout?'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+            style: TextButton.styleFrom(
+              backgroundColor: Colors.grey[300],
+              foregroundColor: Colors.black,
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Logout'),
+            style: TextButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldLogout == true) {
+      _handleLogout(context, ref);
+    }
+  }
+
 
   Future<void> _handleLogout(BuildContext context, WidgetRef ref) async {
     final userPrefs = ref.read(userSharedPrefsProvider);
@@ -38,6 +97,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final themeNotifier = ref.watch(themeNotifierProvider);
+    bool isDarkMode = themeNotifier.isDarkMode;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Settings', style: TextStyle(fontSize: 20,color: Colors.white, fontWeight: FontWeight.bold)),
@@ -71,10 +132,17 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   title: const Text('Dark Mode'),
                   subtitle: const Text('Toggle dark mode for better night-time reading'),
                   value: _isDarkMode,
-                  onChanged: (bool value) {
+                  onChanged: (bool value) async{
+                    final appSharedPrefs = ref.read(AppSharedPrefsProvider);
+                    if(_isDarkMode==true){
+                      final result = await appSharedPrefs.setDarkMode(false);
+                    }else{
+                      final result = await appSharedPrefs.setDarkMode(true);
+                    }
                     setState(() {
                       _isDarkMode = value;
-                      // Handle dark mode toggle here
+                      themeNotifier.toggleTheme(value);
+
                     });
                   },
                 ),
@@ -168,7 +236,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   title: const Text('Logout'),
                   subtitle: const Text('Sign out of your account'),
                   onTap: () {
-                    _handleLogout(context, ref); // Handle logout action
+                    _confirmLogout(); // Handle logout action
                   },
                 ),
               ],

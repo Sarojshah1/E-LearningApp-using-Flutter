@@ -6,12 +6,14 @@ class UserState {
   final String? error;
   final List<UserEntityModel>? users;
   final UserEntityModel? user;
+  final String? message;
 
   UserState({
     required this.isLoading,
     this.error,
     this.users,
     this.user,
+    this.message
   });
 
   factory UserState.initial() {
@@ -20,6 +22,7 @@ class UserState {
       error: null,
       users: null,
       user: null,
+      message: null
     );
   }
 
@@ -28,17 +31,19 @@ class UserState {
     String? error,
     List<UserEntityModel>? users,
     UserEntityModel? user,
+    String? message
   }) {
     return UserState(
       isLoading: isLoading ?? this.isLoading,
       error: error ?? this.error,
       users: users ?? this.users,
       user: user ?? this.user,
+      message: message ?? this.message
     );
   }
 
   @override
   String toString() {
-    return 'UserState(isLoading: $isLoading, error: $error, users: $users, user: $user)';
+    return 'UserState(isLoading: $isLoading, error: $error, users: $users, user: $user,message:$message)';
   }
 }

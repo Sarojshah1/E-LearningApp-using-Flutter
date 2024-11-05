@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:llearning/features/Courses/Presentation/view/CourseDetailsPage.dart';
-import 'dart:async';
-import '../../../../Courses/Presentation/viewmodel/courseViewModel.dart';
-import '../../../../Courses/Presentation/widgets/CourseCard.dart';
+import 'package:llearning/features/Courses/Presentation/viewmodel/courseViewModel.dart';
+import 'package:llearning/features/Courses/Presentation/widgets/CourseCard.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class CoursesPage extends ConsumerStatefulWidget {
@@ -14,7 +13,6 @@ class CoursesPage extends ConsumerStatefulWidget {
 }
 
 class _CoursesPageState extends ConsumerState<CoursesPage> {
-  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
   late ScrollController _scrollController;
   bool _isLoading = false;
   late TextEditingController _searchController;
@@ -74,9 +72,14 @@ class _CoursesPageState extends ConsumerState<CoursesPage> {
       return course.title.toLowerCase().contains(_searchQuery.toLowerCase());
     }).toList();
 
+    final isTablet = MediaQuery.of(context).size.width > 600;
+
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: 80, // Increased height for more prominence
+        title: const Text(
+          'Courses',
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+        ),
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -84,35 +87,10 @@ class _CoursesPageState extends ConsumerState<CoursesPage> {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.2),
-                blurRadius: 10,
-                offset: Offset(0, 4), // changes position of shadow
-              ),
-            ],
           ),
         ),
-        title: const Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Center(
-              child: Text(
-                'Courses',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  fontFamily: 'Roboto', // Custom font
-                ),
-              ),
-            ),
-          ],
-        ),
-        elevation: 0, // Removing default elevation
       ),
       body: RefreshIndicator(
-        key: _refreshIndicatorKey,
         onRefresh: _refreshCourses,
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -141,16 +119,56 @@ class _CoursesPageState extends ConsumerState<CoursesPage> {
               // Introduction Text
               const Text(
                 'Explore our wide range of courses.',
-                style: TextStyle(
-                  fontSize: 18,
-                  color: Colors.black54,
-                ),
+                style: TextStyle(fontSize: 18, color: Colors.black54),
               ),
               const SizedBox(height: 20),
 
-              // List of Courses
+              // List of Courses or GridView
               Expanded(
-                child: ListView.builder(
+                child: isTablet
+                    ? GridView.builder(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    childAspectRatio: 0.7,
+                    crossAxisSpacing: 16.0,
+                    mainAxisSpacing: 16.0,
+                  ),
+                  itemCount: filteredCourses.length + (_isLoading ? 1 : 0),
+                  itemBuilder: (context, index) {
+                    if (index >= filteredCourses.length) {
+                      // Show a loading indicator at the bottom if more courses are being fetched
+                      return Center(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 20),
+                          child: LoadingAnimationWidget.twistingDots(
+                            leftDotColor: const Color(0xFF1A1A3F),
+                            rightDotColor: const Color(0xFFEA3799),
+                            size: 50,
+                          ),
+                        ),
+                      );
+                    }
+                    final course = filteredCourses[index];
+                    return CourseCard(
+                      thumbnail: course.thumbnail,
+                      title: course.title,
+                      description: course.description,
+                      price: "${course.price}",
+                      duration: course.duration,
+                      level: course.level,
+                      creator: course.createdBy.name,
+                      onEnroll: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => CourseDetailsPage(course: course),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                )
+                    : ListView.builder(
                   controller: _scrollController,
                   itemCount: filteredCourses.length + (_isLoading ? 1 : 0),
                   itemBuilder: (context, index) {
@@ -168,25 +186,22 @@ class _CoursesPageState extends ConsumerState<CoursesPage> {
                       );
                     }
                     final course = filteredCourses[index];
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 20.0),
-                      child: CourseCard(
-                        thumbnail: course.thumbnail,
-                        title: course.title,
-                        description: course.description,
-                        price: "${course.price}",
-                        duration: course.duration,
-                        level: course.level,
-                        creator: course.createdBy.name,
-                        onEnroll: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => CourseDetailsPage(course: course),
-                            ),
-                          );
-                        },
-                      ),
+                    return CourseCard(
+                      thumbnail: course.thumbnail,
+                      title: course.title,
+                      description: course.description,
+                      price: "${course.price}",
+                      duration: course.duration,
+                      level: course.level,
+                      creator: course.createdBy.name,
+                      onEnroll: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => CourseDetailsPage(course: course),
+                          ),
+                        );
+                      },
                     );
                   },
                 ),

@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:llearning/features/Auth/presentation/view/Loginview.dart';
 import '../../../../cores/shared_pref/app_shared_pref.dart';
+
 final AppSharedPrefsProvider = Provider<AppSharedPrefs>((ref) {
   return AppSharedPrefs();
 });
+
 class OnboardingView extends ConsumerStatefulWidget {
   const OnboardingView({super.key});
 
@@ -81,74 +83,80 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
               ),
             ),
           ),
-          Positioned(
-            bottom: screenHeight * 0.05, // Responsive positioning
-            left: screenWidth * 0.05,
-            right: screenWidth * 0.05,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: List.generate(
-                    onboardingData.length,
-                        (index) => AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      margin: const EdgeInsets.symmetric(horizontal: 4.0),
-                      height: 8,
-                      width: _currentPage == index ? 20 : 8,
-                      decoration: BoxDecoration(
-                        color: _currentPage == index
-                            ? Colors.blueAccent
-                            : Colors.grey,
-                        borderRadius: BorderRadius.circular(8),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Positioned(
+              bottom: screenHeight * 0.05, // Responsive positioning
+              left: screenWidth * 0.05,
+              right: screenWidth * 0.05,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: List.generate(
+                      onboardingData.length,
+                          (index) => AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        margin: const EdgeInsets.symmetric(horizontal: 4.0),
+                        height: 8,
+                        width: _currentPage == index ? 20 : 8,
+                        decoration: BoxDecoration(
+                          color: _currentPage == index
+                              ? Colors.blueAccent
+                              : Colors.grey,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
                     ),
                   ),
-                ),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    if (_currentPage == onboardingData.length - 1) {
-                      AppSharedPrefs().setFirstTime(false);
-                      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>LoginView()));
-
-                    } else {
-                      _pageController.nextPage(
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.ease,
-                      );
-                    }
-                  },
-                  label: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white, // Background color
-                      shape: BoxShape.circle, // Makes the container rounded
-
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      if (_currentPage == onboardingData.length - 1) {
+                        AppSharedPrefs().setFirstTime(false);
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (context) => LoginView()),
+                        );
+                      } else {
+                        _pageController.nextPage(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.ease,
+                        );
+                      }
+                    },
+                    label: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white, // Background color
+                        shape: BoxShape.circle, // Makes the container rounded
+                      ),
+                      padding: const EdgeInsets.all(8.0), // Padding inside the circle
+                      child: Icon(
+                        _currentPage == onboardingData.length - 1
+                            ? Icons.arrow_forward_outlined
+                            : Icons.arrow_forward,
+                        color: Colors.blue, // Icon color
+                      ),
                     ),
-                    padding: const EdgeInsets.all(8.0), // Padding inside the circle
-                    child: Icon(
-                      _currentPage == onboardingData.length - 1
-                          ? Icons.arrow_forward_outlined
-                          : Icons.arrow_forward,
-                      color: Colors.blue, // Icon color
+                    icon: Text(
+                      _currentPage == onboardingData.length - 1 ? "Continue" : "Next",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: screenWidth * 0.045, // Responsive font size
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blueAccent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30.0),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 12,
+                      ),
                     ),
                   ),
-                  icon: Text(
-                    _currentPage == onboardingData.length - 1 ? "Continue" : "Next",
-                    style: const TextStyle(color: Colors.white,fontSize: 18),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blueAccent,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30.0),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 12,
-                    ),
-                  ),
-                ),
-
-              ],
+                ],
+              ),
             ),
           ),
         ],
@@ -174,6 +182,13 @@ class OnboardingSlide extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Use aspect ratio to make image responsive
+    double imageHeight = screenHeight * 0.4;
+    if (screenWidth > 600) {
+      // Larger height for larger screens
+      imageHeight = screenHeight * 0.5;
+    }
+
     return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: screenWidth * 0.1, // Responsive padding
@@ -184,7 +199,7 @@ class OnboardingSlide extends StatelessWidget {
         children: [
           Image.asset(
             image,
-            height: screenHeight * 0.4, // Responsive image height
+            height: imageHeight, // Responsive image height
             fit: BoxFit.contain,
           ),
           SizedBox(height: screenHeight * 0.05), // Responsive spacing
@@ -203,7 +218,7 @@ class OnboardingSlide extends StatelessWidget {
             description,
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: screenWidth * 0.045, // Responsive font size
+              fontSize: screenWidth > 600 ? screenWidth * 0.05 : screenWidth * 0.045, // Adjusted responsive font size
               color: Colors.grey,
               height: 1.5,
               fontFamily: 'OpenSans',

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 import '../../../Courses/Presentation/viewmodel/courseViewModel.dart';
 import 'content_page.dart';
@@ -46,7 +47,15 @@ class _LessonListPageState extends ConsumerState<LessonListPage> {
           ),
         ),
       ),
-      body: Padding(
+      body: courseState.isLoading?
+      Center(
+        child: LoadingAnimationWidget.twistingDots(
+          leftDotColor: const Color(0xFF1A1A3F),
+          rightDotColor: const Color(0xFFEA3799),
+          size: 50,
+        ),
+      )
+          : Padding(
         padding: const EdgeInsets.all(16.0),
         child: ListView.builder(
           itemCount: courseState.course?.lessons.length,

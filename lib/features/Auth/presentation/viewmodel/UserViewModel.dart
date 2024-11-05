@@ -83,4 +83,27 @@ class UserViewModel extends StateNotifier<UserState>{
 
   }
 
+
+  Future<void> sendOtp(String email)async{
+    state=state.copyWith(isLoading: true,error: null);
+    final result=await userUseCase.sendOtp(email);
+    result.fold((failure)=>state=state.copyWith(isLoading: false,error: failure.error), (message)=>state=state.copyWith(isLoading: false,message: message));
+
+  }
+
+  Future<void> verifyOtp(String email,String otp)async{
+    state=state.copyWith(isLoading: true,error: null);
+    final result=await userUseCase.verifyOtp(otp, email);
+    print(result);
+    result.fold((failure)=>state=state.copyWith(isLoading: false,error: failure.error), (message)=>state=state.copyWith(isLoading: false,message: message));
+
+  }
+  Future<void> ForgetPassword(String email,String password)async{
+    state=state.copyWith(isLoading: true,error: null);
+    final result=await userUseCase.ForgetPassword(password, email);
+    print(result);
+    result.fold((failure)=>state=state.copyWith(isLoading: false,error: failure.error), (message)=>state=state.copyWith(isLoading: false,message: message));
+
+  }
+
 }

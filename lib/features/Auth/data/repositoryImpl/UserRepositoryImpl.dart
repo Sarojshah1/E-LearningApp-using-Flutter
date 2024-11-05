@@ -55,4 +55,16 @@ class UserRepositoryImpl implements UserRepository {
 
 
   }
+  @override
+  Future<Either<Failure, String>> sendOtp(String email) async{
+    return await remoteDataSource.sendOtp(email);
+  }
+  @override
+  Future<Either<Failure, String>> verifyOtp(String otp, String email) async{
+    return await remoteDataSource.verifyOtp(otp, email);
+  }
+  @override
+  Future<Either<Failure, String>> ForgetPassword(String password, String email) async{
+    return await remoteDataSource.ForgetPassword(password, email);
+  }
 }

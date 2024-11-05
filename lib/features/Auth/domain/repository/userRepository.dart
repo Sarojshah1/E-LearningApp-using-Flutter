@@ -12,4 +12,7 @@ abstract class UserRepository {
   Future<Either<Failure, bool>> updateUserDetails(UserEntity user);
   Future<Either<Failure, bool>> updateProfilePicture(File? profilePicture);
   Future<Either<Failure,bool>> userLogin(  String email,  String password);
+  Future<Either<Failure,String>> sendOtp(String email);
+  Future<Either<Failure,String>> verifyOtp(String otp,String email);
+  Future<Either<Failure,String>> ForgetPassword(String password,String email);
 }

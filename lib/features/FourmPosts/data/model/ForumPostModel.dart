@@ -236,4 +236,5 @@ class ForumPostModel extends Equatable {
     likes,
     comments,
   ];
+
 }

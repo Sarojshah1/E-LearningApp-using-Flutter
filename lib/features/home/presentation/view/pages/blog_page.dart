@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:llearning/features/blog/presentation/view/blog_details_page.dart';
 import 'package:llearning/features/blog/presentation/viewmodel/blog_view_model.dart';
+import '../../../../../App/app.dart';
 import '../../../../blog/data/model/blog_model.dart';
 import '../../../../blog/presentation/wigets/BlogCard.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
@@ -47,8 +48,8 @@ class _BlogPageState extends ConsumerState<BlogPage> {
   }
 
   Future<void> _loadMoreBlogs() async {
-    final blogstate=ref.read(blogViewModelProvider);
-    if(_isLoading || blogstate.hasReachedMax) return;
+    final blogState = ref.read(blogViewModelProvider);
+    if (_isLoading || blogState.hasReachedMax) return;
     setState(() {
       _isLoading = true;
     });
@@ -56,8 +57,6 @@ class _BlogPageState extends ConsumerState<BlogPage> {
     setState(() {
       _isLoading = false;
     });
-
-
   }
 
   void _debounceSearchChanged() {
@@ -68,12 +67,13 @@ class _BlogPageState extends ConsumerState<BlogPage> {
       });
     });
   }
+
   Future<void> _refreshBlogs() async {
     await ref.read(blogViewModelProvider.notifier).getBlogs();
   }
 
   void _onBlogCardTap(BlogModel blog) {
-    Navigator.push(context, MaterialPageRoute(builder: (context)=>BlogDetailPage(blog: blog)));
+    Navigator.push(context, MaterialPageRoute(builder: (context) => BlogDetailPage(blog: blog)));
   }
 
   @override
@@ -83,7 +83,9 @@ class _BlogPageState extends ConsumerState<BlogPage> {
     final filteredBlogs = blogs.where((blog) {
       return blog.title.toLowerCase().contains(_searchQuery.toLowerCase());
     }).toList();
-    print(blogState);
+
+    final themeNotifier = ref.watch(themeNotifierProvider);
+    bool isDarkMode = themeNotifier.isDarkMode;
 
     return Scaffold(
       appBar: AppBar(
@@ -91,7 +93,7 @@ class _BlogPageState extends ConsumerState<BlogPage> {
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [Colors.deepPurpleAccent, Colors.deepPurple],
+              colors: isDarkMode ? [Colors.black26, Colors.black12] : [Colors.deepPurpleAccent, Colors.deepPurple],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -125,75 +127,81 @@ class _BlogPageState extends ConsumerState<BlogPage> {
         onRefresh: _refreshBlogs,
         child: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Search Bar
-              Container(
-                margin: const EdgeInsets.only(bottom: 20.0),
-                child: TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    hintText: 'Search for blogs...',
-                    prefixIcon: Icon(Icons.search, color: Colors.deepPurpleAccent),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30.0),
-                      borderSide: BorderSide.none,
-                    ),
-                    filled: true,
-                    fillColor: Colors.grey[400],
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-                  ),
-                ),
-              ),
-              // Introduction Text
-              const Text(
-                'Explore a wide range of blogs.',
-                style: TextStyle(
-                  fontSize: 18,
-                  color: Colors.black54,
-                ),
-              ),
-              const SizedBox(height: 20),
-              // List of Blogs
-              Expanded(
-                child: blogState.isLoading
-                    ? Center(
-                  child: LoadingAnimationWidget.twistingDots(
-                    leftDotColor: const Color(0xFF1A1A3F),
-                    rightDotColor: const Color(0xFFEA3799),
-                    size: 50,
-                  ),
-                )
-
-                    : ListView.builder(
-                  controller: _scrollController,
-                  itemCount: filteredBlogs.length + (_isLoading ? 1 : 0),
-                  itemBuilder: (context, index) {
-                    if (index >= filteredBlogs.length) {
-                      return Center(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 20),
-                          child: LoadingAnimationWidget.twistingDots(
-                            leftDotColor: const Color(0xFF1A1A3F),
-                            rightDotColor: const Color(0xFFEA3799),
-                            size: 50,
-                          ),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Search Bar
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 20.0),
+                    child: TextField(
+                      controller: _searchController,
+                      decoration: InputDecoration(
+                        hintText: 'Search for blogs...',
+                        prefixIcon: Icon(Icons.search, color: Colors.deepPurpleAccent),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30.0),
+                          borderSide: BorderSide.none,
                         ),
-                      );
-                    }
-                    final blog = filteredBlogs[index];
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 20.0),
-                      child: BlogCard(
-                        blog: blog,
-                        onCardTap: _onBlogCardTap,
+                        filled: true,
+                        fillColor: isDarkMode ? Colors.white : Colors.grey[400],
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
                       ),
-                    );
-                  },
-                ),
-              ),
-            ],
+                    ),
+                  ),
+                  // Introduction Text
+                  Text(
+                    'Explore a wide range of blogs.',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: isDarkMode ? Colors.white : Colors.black54,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  // List of Blogs
+                  Expanded(
+                    child: blogState.isLoading
+                        ? Center(
+                      child: LoadingAnimationWidget.twistingDots(
+                        leftDotColor: const Color(0xFF1A1A3F),
+                        rightDotColor: const Color(0xFFEA3799),
+                        size: 50,
+                      ),
+                    )
+                        : GridView.builder(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: constraints.maxWidth > 600 ? 3 : 1,
+                        childAspectRatio: 1.7, // Adjust the aspect ratio for cards
+                        crossAxisSpacing: 10,
+                        mainAxisSpacing: 10,
+                      ),
+                      controller: _scrollController,
+                      itemCount: filteredBlogs.length + (_isLoading ? 1 : 0),
+                      itemBuilder: (context, index) {
+                        if (index >= filteredBlogs.length) {
+                          return Center(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 20),
+                              child: LoadingAnimationWidget.twistingDots(
+                                leftDotColor: const Color(0xFF1A1A3F),
+                                rightDotColor: const Color(0xFFEA3799),
+                                size: 50,
+                              ),
+                            ),
+                          );
+                        }
+                        final blog = filteredBlogs[index];
+                        return BlogCard(
+                          blog: blog,
+                          onCardTap: _onBlogCardTap,
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
         ),
       ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../viewmodel/study_group_viewModel.dart';
 import '../widgets/studygroupcard.dart';
 
 class StudyGroupPage extends ConsumerStatefulWidget {
@@ -10,56 +11,31 @@ class StudyGroupPage extends ConsumerStatefulWidget {
 }
 
 class _StudyGroupPageState extends ConsumerState<StudyGroupPage> {
-  List<Map<String, dynamic>> studyGroups = [
-    {
-      'groupName': 'Physics Study Group',
-      'description': 'A group for all physics enthusiasts.',
-      'createdBy': 'Alice',
-      'members': 10,
-    },
-    {
-      'groupName': 'Math Wizards',
-      'description': 'Solving math problems together.',
-      'createdBy': 'Bob',
-      'members': 8,
-    },
-    {
-      'groupName': 'Biology Buddies',
-      'description': 'Discussing everything about biology.',
-      'createdBy': 'Charlie',
-      'members': 12,
-    },
-  ];
 
-  List<Map<String, dynamic>> filteredGroups = [];
-  TextEditingController searchController = TextEditingController();
+
+  late TextEditingController _searchController;
+  String _searchQuery = '';
 
   @override
   void initState() {
     super.initState();
-    filteredGroups = studyGroups;
-    searchController.addListener(_filterStudyGroups);
+    _searchController = TextEditingController();
+    Future.microtask(() {
+      ref.read(studyGroupViewModelProvider.notifier).getGroups();
+    });
+
   }
 
-  void _filterStudyGroups() {
-    final query = searchController.text.toLowerCase();
-    setState(() {
-      filteredGroups = studyGroups.where((group) {
-        return group['groupName'].toLowerCase().contains(query);
-      }).toList();
-    });
-  }
 
   @override
   void dispose() {
-    searchController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
   void _showCreateGroupDialog() {
     final groupNameController = TextEditingController();
     final descriptionController = TextEditingController();
-    final createdByController = TextEditingController();
 
     showDialog(
       context: context,
@@ -98,15 +74,7 @@ class _StudyGroupPageState extends ConsumerState<StudyGroupPage> {
                           hintText: 'Enter the group description',
                         ),
                       ),
-                      SizedBox(height: 16),
-                      TextField(
-                        controller: createdByController,
-                        decoration: InputDecoration(
-                          labelText: 'Created By',
-                          border: OutlineInputBorder(),
-                          hintText: 'Enter your name',
-                        ),
-                      ),
+
                     ],
                   ),
                 ),
@@ -130,20 +98,29 @@ class _StudyGroupPageState extends ConsumerState<StudyGroupPage> {
               ),
               elevation: 6,
             ),
-            onPressed: () {
+            onPressed: () async{
               final groupName = groupNameController.text;
               final description = descriptionController.text;
-              final createdBy = createdByController.text;
 
-              if (groupName.isNotEmpty && description.isNotEmpty && createdBy.isNotEmpty) {
-                setState(() {
-                  studyGroups.add({
-                    'groupName': groupName,
-                    'description': description,
-                    'createdBy': createdBy,
-                    'members': 1,
-                  });
-                });
+
+              if (groupName.isNotEmpty && description.isNotEmpty) {
+
+                final viewModel=ref.read(studyGroupViewModelProvider.notifier);
+                await viewModel.createGroups(groupName, description);
+                final state=ref.read(studyGroupViewModelProvider);
+
+                if(state.error != null){
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('something went wrong')),
+                  );
+
+                }else{
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Group Created Successfully')),
+                  );
+
+                }
+
                 Navigator.of(context).pop();
               }
             },
@@ -156,6 +133,11 @@ class _StudyGroupPageState extends ConsumerState<StudyGroupPage> {
 
   @override
   Widget build(BuildContext context) {
+    final state=ref.watch(studyGroupViewModelProvider);
+    final filteredGroups=state.studyGroups.where((group) {
+      return group.groupName.toLowerCase().contains(_searchQuery.toLowerCase());
+    }).toList();
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -219,19 +201,25 @@ class _StudyGroupPageState extends ConsumerState<StudyGroupPage> {
                     SizedBox(width: 8),
                     Expanded(
                       child: TextField(
-                        controller: searchController,
+                        controller: _searchController,
                         decoration: InputDecoration(
                           hintText: 'Search by group name',
                           border: InputBorder.none,
                         ),
+                        onChanged: (value) {
+                          setState(() {
+                            _searchQuery = value; // Update _searchQuery with the input value
+                          });
+                        },
                       ),
                     ),
-                    if (searchController.text.isNotEmpty)
+                    if (_searchController.text.isNotEmpty)
                       IconButton(
                         icon: Icon(Icons.clear, color: Colors.deepPurple),
                         onPressed: () {
-                          searchController.clear();
-                          _filterStudyGroups(); // Clear the filter
+                          _searchController.clear();
+
+
                         },
                       ),
                   ],
@@ -250,10 +238,11 @@ class _StudyGroupPageState extends ConsumerState<StudyGroupPage> {
                     child: Column(
                       children: [
                         StudyGroupCard(
-                          groupName: group['groupName'],
-                          description: group['description'],
-                          createdBy: group['createdBy'],
-                          members: group['members'],
+                          groupId: group.id!,
+                          groupName: group.groupName,
+                          description: group.description,
+                          createdBy: group.createdBy,
+                          members: group.members.length,
 
                         ),
                         Divider(

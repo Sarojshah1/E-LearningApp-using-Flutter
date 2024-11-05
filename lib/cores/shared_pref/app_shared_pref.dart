@@ -58,5 +58,36 @@ class AppSharedPrefs{
       return left(Failure(error: e.toString()));
     }
   }
+  Future<Either<Failure, bool>> setDarkMode(bool mode) async {
+    try {
+      _sharedPreferences = await SharedPreferences.getInstance();
+      await _sharedPreferences.setBool('DarkMode', mode);
+      return right(true);
+    } catch (e) {
+      return left(Failure(error: e.toString()));
+    }
+  }
+  // Get user token
+  Future<Either<Failure, bool?>> getDarkMode() async {
+    try {
+      _sharedPreferences = await SharedPreferences.getInstance();
+      final firstTime = _sharedPreferences.getBool('DarkMode');
+      return right(firstTime);
+    } catch (e) {
+      return left(Failure(error: e.toString()));
+    }
+  }
+
+  Future<Either<Failure, bool>> deleteDarkMode() async {
+    try {
+      _sharedPreferences = await SharedPreferences.getInstance();
+      await _sharedPreferences.remove('DarkMode');
+      return right(true);
+    } catch (e) {
+      return left(Failure(error: e.toString()));
+    }
+  }
+
+
 
 }

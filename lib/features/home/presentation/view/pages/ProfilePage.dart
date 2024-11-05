@@ -10,6 +10,7 @@ import 'package:llearning/features/profile/presentation/view/QuizResultsPage.dar
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import '../../../../Auth/presentation/view/EditProfile.dart';
 import '../../../../Auth/presentation/viewModel/userViewModel.dart';
+import '../../../../StudyGroups/presentation/view/GroupPage.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
@@ -220,6 +221,15 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     icon: Icons.school_rounded,
                     onTap: () {
                       Navigator.push(context, MaterialPageRoute(builder: (context)=>MyLearningPage()));
+                    },
+                    fontSize: fontSizeSubtitle,
+                    iconSize: iconSize,
+                  ),
+                  ProfileSection(
+                    title: 'My Groups',
+                    icon: Icons.groups,
+                    onTap: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context)=>JoinedGroupsPage()));
                     },
                     fontSize: fontSizeSubtitle,
                     iconSize: iconSize,

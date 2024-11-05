@@ -14,7 +14,7 @@ class PostViewModel extends StateNotifier<ForumPostState>{
     state = state.copyWith(isLoading: true);
     final result=await useCase.createPost(title, content, tags);
     result.fold((failure)=>state=state.copyWith(isLoading: false,error: failure.error),
-        (success)=>state=state.copyWith(isLoading: false));
+        (success)=>state=state.copyWith(isLoading: false,error: null));
   }
   Future<void> getPost()async{
     state = state.copyWith(isLoading: true);

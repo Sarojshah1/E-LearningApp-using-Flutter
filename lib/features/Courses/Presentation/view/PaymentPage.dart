@@ -38,10 +38,10 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
               transactions: [
                 {
                   "amount": {
-                    "total": widget.course.price/133,
+                    "total": widget.course.price,
                     "currency": "USD",
                     "details": {
-                      "subtotal": widget.course.price/133,
+                      "subtotal": widget.course.price,
                       "shipping": '0',
                       "shipping_discount": 0,
                     },
@@ -52,7 +52,7 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
                       {
                         "name": widget.course.title,
                         "quantity": 1,
-                        "price": widget.course.price/133,
+                        "price": widget.course.price,
                         "currency": "USD",
                       },
                     ],
@@ -177,8 +177,6 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
             const SizedBox(height: 20),
 
             // Payment Methods
-            _buildPaymentMethod(Icons.credit_card, 'Card Payment', 'Visa, Mastercard, Amex', screenWidth),
-            _buildPaymentMethod(Icons.account_balance_wallet, 'eSewa', 'Fast and secure payment via eSewa', screenWidth),
             _buildPaymentMethod(Icons.account_balance, 'Khalti', 'Pay via Khalti for quick transactions', screenWidth),
             _buildPaymentMethod(Icons.paypal, 'PayPal', 'Secure global payment through PayPal', screenWidth),
 

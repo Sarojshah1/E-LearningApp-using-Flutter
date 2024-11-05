@@ -2,10 +2,12 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:llearning/features/Auth/presentation/view/SignUpView.dart';
+import '../../../../App/app.dart';
 import '../../../../cores/failure/failure.dart';
 import '../../../../cores/shared_pref/user_shared_pref.dart';
 import '../../../home/presentation/view/HomeView.dart';
 import '../viewModel/userViewModel.dart';
+import 'forget_password_page.dart';
 
 final userSharedPrefsProvider = Provider<UserSharedPrefs>((ref) {
   return UserSharedPrefs();
@@ -28,11 +30,14 @@ class _LoginViewState extends ConsumerState<LoginView> {
   @override
   Widget build(BuildContext context) {
     final authViewModel = ref.watch(authViewModelProvider.notifier);
+    final themeNotifier = ref.watch(themeNotifierProvider);
+    bool isDarkMode = themeNotifier.isDarkMode;
+
     return Scaffold(
       body: Stack(
         children: [
           Container(
-            color: Colors.white, // Simple white background
+            color:isDarkMode ? Colors.black: Colors.white, // Simple white background
             child: Center(
               child: SingleChildScrollView(
                 child: Padding(
@@ -52,7 +57,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
                           style: TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black,
+                            color:isDarkMode ? Colors.white: Colors.black,
                           ),
                         ),
                         SizedBox(height: 10),
@@ -61,7 +66,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
                           textAlign: TextAlign.left,
                           style: TextStyle(
                             fontSize: 16,
-                            color: Colors.grey.shade600,
+                            color:isDarkMode ? Colors.white: Colors.grey.shade600,
                           ),
                         ),
                         SizedBox(height: 30),
@@ -71,8 +76,8 @@ class _LoginViewState extends ConsumerState<LoginView> {
                           decoration: InputDecoration(
                             hintText: "Email",
                             filled: true,
-                            fillColor: Colors.grey.shade200,
-                            prefixIcon: Icon(Icons.email, color: Colors.grey.shade600),
+                            fillColor:isDarkMode ? Colors.white54: Colors.grey.shade200,
+                            prefixIcon: Icon(Icons.email, color: isDarkMode ? Colors.black38:Colors.grey.shade600),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10),
                               borderSide: BorderSide.none,
@@ -96,8 +101,8 @@ class _LoginViewState extends ConsumerState<LoginView> {
                           decoration: InputDecoration(
                             hintText: "Password",
                             filled: true,
-                            fillColor: Colors.grey.shade200,
-                            prefixIcon: Icon(Icons.lock, color: Colors.grey.shade600),
+                            fillColor:isDarkMode ? Colors.white54: Colors.grey.shade200,
+                            prefixIcon: Icon(Icons.lock, color:isDarkMode ? Colors.black38: Colors.grey.shade600),
                             suffixIcon: IconButton(
                               icon: Icon(
                                 _obscureText ? Icons.visibility : Icons.visibility_off,
@@ -141,7 +146,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
                             ),
                             TextButton(
                               onPressed: () {
-                                // Handle Forgot Password
+                                Navigator.push(context, MaterialPageRoute(builder: (context)=>ForgetPasswordPage()));
                               },
                               child: Text(
                                 "Forgot Password?",

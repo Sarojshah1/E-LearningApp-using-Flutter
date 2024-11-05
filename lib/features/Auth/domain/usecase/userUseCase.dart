@@ -36,4 +36,13 @@ class userUsecase{
     return await userRepository.userLogin(email, password);
 
   }
+  Future<Either<Failure,String>> sendOtp(String email)async{
+    return await userRepository.sendOtp(email);
+  }
+  Future<Either<Failure,String>> verifyOtp(String otp,String email)async{
+    return await userRepository.verifyOtp(otp, email);
+  }
+  Future<Either<Failure,String>> ForgetPassword(String password,String email)async{
+    return await userRepository.ForgetPassword(password, email);
+  }
 }

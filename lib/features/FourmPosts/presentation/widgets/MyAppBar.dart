@@ -6,14 +6,15 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 import '../../../Auth/presentation/viewModel/userViewModel.dart';
 import '../../../StudyGroups/presentation/view/studyGroupsPage.dart';
+import '../view/CreatePostPage.dart';
 
 // State provider for managing user profile image (example usage)
 final profileImageProvider = StateProvider<String>((ref) => 'assets/icons/profile_picture.png');
 
 class MyAppBar extends ConsumerStatefulWidget implements PreferredSizeWidget {
-  final VoidCallback onCreatePost;
+  // final VoidCallback onCreatePost;
 
-  MyAppBar({required this.onCreatePost});
+  // MyAppBar({required this.onCreatePost});
 
   @override
   ConsumerState<MyAppBar> createState() => _MyAppBarState();
@@ -59,7 +60,36 @@ class _MyAppBarState extends ConsumerState<MyAppBar> {
         ),
       ),
       title: GestureDetector(
-        onTap: widget.onCreatePost,
+        onTap: () {
+    Navigator.of(context).push(
+    PageRouteBuilder(
+    pageBuilder: (context, animation, secondaryAnimation) => CreatePostPage(profile:userdetail.profilePicture,),
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+    const begin = Offset(1.0, 0.0); // Start from the right
+    const end = Offset.zero; // End at the current position
+    const curve = Curves.easeInOut;
+
+    var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+    var offsetAnimation = animation.drive(tween);
+
+    // Scale and Fade effect
+    var scaleTween = Tween<double>(begin: 0.0, end: 1.0);
+    var scaleAnimation = animation.drive(scaleTween.chain(CurveTween(curve: curve)));
+
+    return SlideTransition(
+    position: offsetAnimation,
+    child: ScaleTransition(
+    scale: scaleAnimation,
+    child: FadeTransition(
+    opacity: animation,
+    child: child,
+    ),
+    ),
+    );
+    },
+    ),
+    );
+    },
         child: Container(
           padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
