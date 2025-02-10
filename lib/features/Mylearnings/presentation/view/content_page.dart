@@ -7,8 +7,9 @@ import 'package:path_provider/path_provider.dart';
 
 class PDFViewPage extends StatefulWidget {
   final String pdfUrl;
+  final String title;
 
-  const PDFViewPage({Key? key, required this.pdfUrl}) : super(key: key);
+  const PDFViewPage({Key? key, required this.pdfUrl,required this.title}) : super(key: key);
 
   @override
   State<PDFViewPage> createState() => _PDFViewPageState();
@@ -73,7 +74,7 @@ class _PDFViewPageState extends State<PDFViewPage> {
     if (_isLoading) {
       return Scaffold(
         appBar: AppBar(
-          title: Text('PDF Viewer'),
+          title: Text(widget.title),
           flexibleSpace: Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -116,7 +117,7 @@ class _PDFViewPageState extends State<PDFViewPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('PDF Viewer'),
+        title: Text(widget.title),
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(

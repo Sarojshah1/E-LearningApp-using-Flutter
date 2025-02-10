@@ -53,40 +53,46 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      body: Stack(
-        children: [
-          PageView.builder(
-            controller: _pageController,
-            onPageChanged: _onPageChanged,
-            itemCount: onboardingData.length,
-            itemBuilder: (context, index) => OnboardingSlide(
-              image: onboardingData[index]["image"]!,
-              title: onboardingData[index]["title"]!,
-              description: onboardingData[index]["description"]!,
-              screenWidth: screenWidth,
-              screenHeight: screenHeight,
-            ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.blueAccent, Colors.lightBlue.shade100],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
-          Positioned(
-            top: screenHeight * 0.05, // Responsive positioning
-            right: screenWidth * 0.05,
-            child: TextButton(
-              onPressed: () {
-                _pageController.jumpToPage(onboardingData.length - 1);
-              },
-              child: const Text(
-                "Skip",
-                style: TextStyle(
-                  color: Colors.blueAccent,
-                  fontWeight: FontWeight.bold,
+        ),
+        child: Stack(
+          children: [
+            PageView.builder(
+              controller: _pageController,
+              onPageChanged: _onPageChanged,
+              itemCount: onboardingData.length,
+              itemBuilder: (context, index) => OnboardingSlide(
+                image: onboardingData[index]["image"]!,
+                title: onboardingData[index]["title"]!,
+                description: onboardingData[index]["description"]!,
+                screenWidth: screenWidth,
+                screenHeight: screenHeight,
+              ),
+            ),
+            Positioned(
+              top: screenHeight * 0.05,
+              right: screenWidth * 0.05,
+              child: TextButton(
+                onPressed: () {
+                  _pageController.jumpToPage(onboardingData.length - 1);
+                },
+                child: const Text(
+                  "Skip",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
-          ),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Positioned(
-              bottom: screenHeight * 0.05, // Responsive positioning
+            Positioned(
+              bottom: screenHeight * 0.05,
               left: screenWidth * 0.05,
               right: screenWidth * 0.05,
               child: Row(
@@ -102,8 +108,8 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
                         width: _currentPage == index ? 20 : 8,
                         decoration: BoxDecoration(
                           color: _currentPage == index
-                              ? Colors.blueAccent
-                              : Colors.grey,
+                              ? Colors.white
+                              : Colors.white54,
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
@@ -124,25 +130,20 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
                         );
                       }
                     },
-                    label: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white, // Background color
-                        shape: BoxShape.circle, // Makes the container rounded
-                      ),
-                      padding: const EdgeInsets.all(8.0), // Padding inside the circle
-                      child: Icon(
-                        _currentPage == onboardingData.length - 1
-                            ? Icons.arrow_forward_outlined
-                            : Icons.arrow_forward,
-                        color: Colors.blue, // Icon color
+                    label: Text(
+                      _currentPage == onboardingData.length - 1
+                          ? "Continue"
+                          : "Next",
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    icon: Text(
-                      _currentPage == onboardingData.length - 1 ? "Continue" : "Next",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: screenWidth * 0.045, // Responsive font size
-                      ),
+                    icon: Icon(
+                      _currentPage == onboardingData.length - 1
+                          ? Icons.arrow_forward_outlined
+                          : Icons.arrow_forward,
+                      color: Colors.white,
                     ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blueAccent,
@@ -158,8 +159,8 @@ class _OnboardingViewState extends ConsumerState<OnboardingView> {
                 ],
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -182,16 +183,14 @@ class OnboardingSlide extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Use aspect ratio to make image responsive
     double imageHeight = screenHeight * 0.4;
     if (screenWidth > 600) {
-      // Larger height for larger screens
       imageHeight = screenHeight * 0.5;
     }
 
     return Padding(
       padding: EdgeInsets.symmetric(
-        horizontal: screenWidth * 0.1, // Responsive padding
+        horizontal: screenWidth * 0.1,
         vertical: screenHeight * 0.05,
       ),
       child: Column(
@@ -199,29 +198,29 @@ class OnboardingSlide extends StatelessWidget {
         children: [
           Image.asset(
             image,
-            height: imageHeight, // Responsive image height
-            fit: BoxFit.contain,
+            height: imageHeight,
+            fit: BoxFit.cover,
           ),
-          SizedBox(height: screenHeight * 0.05), // Responsive spacing
+          SizedBox(height: screenHeight * 0.04),
           Text(
             title,
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: screenWidth * 0.08, // Responsive font size
+              fontSize: screenWidth * 0.08,
               fontWeight: FontWeight.bold,
-              color: Colors.blueAccent,
-              fontFamily: 'Roboto',
+              color: Colors.white,
             ),
           ),
-          SizedBox(height: screenHeight * 0.02), // Responsive spacing
+          SizedBox(height: screenHeight * 0.02),
           Text(
             description,
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: screenWidth > 600 ? screenWidth * 0.05 : screenWidth * 0.045, // Adjusted responsive font size
-              color: Colors.grey,
+              fontSize: screenWidth > 600
+                  ? screenWidth * 0.05
+                  : screenWidth * 0.045,
+              color: Colors.white70,
               height: 1.5,
-              fontFamily: 'OpenSans',
             ),
           ),
         ],

@@ -51,4 +51,10 @@ class CourseViewModel extends StateNotifier<CourseState> {
         (course)=>state=state.copyWith(isLoading: false,course: course));
 
   }
+  Future<void> createPayment( String course_id, int amount, String payment_method, String status)async{
+    state = state.copyWith(isLoading: true);
+    final result=await courseUseCase.createPayment(course_id: course_id, amount: amount, payment_method: payment_method, status: status);
+    result.fold((failure)=>state.copyWith(isLoading: false,error: failure.error), (success)=>state=state.copyWith(isLoading: false,error: null));
+  }
+
 }

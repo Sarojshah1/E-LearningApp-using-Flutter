@@ -100,31 +100,23 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     final themeNotifier = ref.watch(themeNotifierProvider);
     bool isDarkMode = themeNotifier.isDarkMode;
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Settings', style: TextStyle(fontSize: 20,color: Colors.white, fontWeight: FontWeight.bold)),
-        centerTitle: true,
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.purple, Colors.indigo],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-        ),
-      ),
+      // appBar: AppBar(
+      //   title: const Text('Settings', style: TextStyle(fontSize: 20,color: Colors.white, fontWeight: FontWeight.bold)),
+      //   centerTitle: true,
+      //   flexibleSpace: Container(
+      //     decoration: const BoxDecoration(
+      //       gradient: LinearGradient(
+      //         colors: [Colors.purple, Colors.indigo],
+      //         begin: Alignment.topLeft,
+      //         end: Alignment.bottomRight,
+      //       ),
+      //     ),
+      //   ),
+      // ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
         child: ListView(
           children: [
-            Text(
-              'Manage Your Learning Experience',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Colors.teal[800],
-              ),
-            ),
             const SizedBox(height: 20),
             _buildCard(
               children: [

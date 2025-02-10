@@ -19,5 +19,8 @@ class CourseUseCase{
   Future<Either<Failure, CourseModel>> getCoursesById(String courseId)async{
     return await courseRepository.getCoursesById(courseId);
   }
+  Future<Either<Failure, bool>> createPayment({required String course_id, required int amount,required String payment_method,required String status}) async{
+    return await courseRepository.createPayment(course_id: course_id, amount: amount, payment_method: payment_method, status: status);
+  }
 
 }

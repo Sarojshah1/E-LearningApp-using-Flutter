@@ -133,26 +133,39 @@ class _BlogDetailPageState extends State<BlogDetailPage> {
                       children: [
                         const Icon(Icons.person, size: 16, color: Colors.black54),
                         const SizedBox(width: 4),
-                        Text(
-                          widget.blog.userId.name,
-                          style: const TextStyle(fontSize: 16, color: Colors.black54),
+                        Flexible(
+                          child: Text(
+                            widget.blog.userId.name,
+                            style: const TextStyle(fontSize: 16, color: Colors.black54),
+                            overflow: TextOverflow.ellipsis, // Truncate if the text is too long
+                            maxLines: 1, // Restrict to one line
+                          ),
                         ),
                         const SizedBox(width: 16),
                         const Icon(Icons.calendar_today, size: 16, color: Colors.black54),
                         const SizedBox(width: 4),
-                        Text(
-                          FormatDate.formatDateOnly(widget.blog.createdAt),
-                          style: const TextStyle(fontSize: 16, color: Colors.black54),
+                        Flexible(
+                          child: Text(
+                            FormatDate.formatDateOnly(widget.blog.createdAt),
+                            style: const TextStyle(fontSize: 16, color: Colors.black54),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
                         ),
                         const SizedBox(width: 16),
                         const Icon(Icons.access_time, size: 16, color: Colors.black54),
                         const SizedBox(width: 4),
-                        Text(
-                          '1 hrs read',
-                          style: const TextStyle(fontSize: 16, color: Colors.black54),
+                        Flexible(
+                          child: Text(
+                            '1 hrs read',
+                            style: const TextStyle(fontSize: 16, color: Colors.black54),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
                         ),
                       ],
-                    ),
+                    )
+
                   ],
                 ),
               ),

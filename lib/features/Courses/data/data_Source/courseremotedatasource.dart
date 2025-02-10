@@ -61,6 +61,40 @@ class CourseRemoteDataSource {
       return left(Failure(error: e.message.toString()));
     }
   }
+  Future<Either<Failure, bool>> createPayment({required String course_id, required int amount,required String payment_method,required String status}) async {
+    try {
+      final token = await userSharedPrefs.getUserToken();
+      final authToken = token.fold(
+            (l) => throw Failure(error: l.error),
+            (r) => r,
+      );
+
+      // Use the token in the request header if needed
+      Response response = await dio.post(
+        ApiEndpoints.payment,
+        data: {
+          'course_id': course_id,
+          'amount': amount,
+          'payment_method': payment_method,
+          'status': status,
+        },
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $authToken',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+
+        return right(true);
+      } else {
+        return left(Failure(error: "Failed to load courses"));
+      }
+    } on DioException catch (e) {
+      return left(Failure(error: e.message.toString()));
+    }
+  }
   Future<Either<Failure, CourseModel>> getCoursesById(String courseId) async {
     try {
       final token = await userSharedPrefs.getUserToken();

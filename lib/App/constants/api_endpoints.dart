@@ -19,6 +19,7 @@ class ApiEndpoints {
   static const String updateProfilePicture = "$baseUrl/user/update-profile-picture";
   static const String sendOtp="$baseUrl/otp";
   static const String verifyOtp="$baseUrl/verify";
+  static const String payment="$baseUrl/payment";
   static const String ForgetPassword="$baseUrl/user/update-password-by-email";
 //   course routes
 static const String getCourses="$baseUrl/courses/pagination";

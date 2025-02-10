@@ -88,40 +88,40 @@ class _BlogPageState extends ConsumerState<BlogPage> {
     bool isDarkMode = themeNotifier.isDarkMode;
 
     return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: 80,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: isDarkMode ? [Colors.black26, Colors.black12] : [Colors.deepPurpleAccent, Colors.deepPurple],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.2),
-                blurRadius: 10,
-                offset: Offset(0, 4),
-              ),
-            ],
-          ),
-        ),
-        title: const Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'Explore Blogs',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-                fontFamily: 'Roboto',
-              ),
-            ),
-          ],
-        ),
-        elevation: 0,
-      ),
+      // appBar: AppBar(
+      //   toolbarHeight: 80,
+      //   flexibleSpace: Container(
+      //     decoration: BoxDecoration(
+      //       gradient: LinearGradient(
+      //         colors: isDarkMode ? [Colors.black26, Colors.black12] : [Colors.deepPurpleAccent, Colors.deepPurple],
+      //         begin: Alignment.topLeft,
+      //         end: Alignment.bottomRight,
+      //       ),
+      //       boxShadow: [
+      //         BoxShadow(
+      //           color: Colors.black.withOpacity(0.2),
+      //           blurRadius: 10,
+      //           offset: Offset(0, 4),
+      //         ),
+      //       ],
+      //     ),
+      //   ),
+      //   title: const Row(
+      //     mainAxisAlignment: MainAxisAlignment.center,
+      //     children: [
+      //       Text(
+      //         'Explore Blogs',
+      //         style: TextStyle(
+      //           fontSize: 24,
+      //           fontWeight: FontWeight.bold,
+      //           color: Colors.white,
+      //           fontFamily: 'Roboto',
+      //         ),
+      //       ),
+      //     ],
+      //   ),
+      //   elevation: 0,
+      // ),
       body: RefreshIndicator(
         key: _refreshIndicatorKey,
         onRefresh: _refreshBlogs,

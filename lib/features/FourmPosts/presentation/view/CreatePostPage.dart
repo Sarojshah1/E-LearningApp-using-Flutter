@@ -38,16 +38,11 @@ class _CreatePostPageState extends ConsumerState<CreatePostPage> {
       await viewModel.createPost(title, content, selectedTags); // Pass title to the createPost method
       final state = ref.read(postViewModelProvider);
 
-      if (state.error != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Something went wrong')),
-        );
-      } else {
         _showPostCreatedDialog();
         _contentController.clear();
         _titleController.clear();
         selectedTags.clear();
-      }
+
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(title.isEmpty ? 'Please enter a title' : 'Please enter content')),

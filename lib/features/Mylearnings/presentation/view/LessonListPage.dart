@@ -91,7 +91,8 @@ class _LessonListPageState extends ConsumerState<LessonListPage> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => PDFViewPage(
-                        pdfUrl: lesson.content, // Assuming content holds the PDF URL
+                        pdfUrl: lesson.content,
+                        title: lesson.title,
                       ),
                     ),
                   );

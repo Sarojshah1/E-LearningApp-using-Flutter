@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:llearning/features/Courses/Presentation/viewmodel/courseViewModel.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:llearning/features/Courses/data/model/course_model.dart';
 import 'package:flutter_paypal/flutter_paypal.dart';
@@ -24,7 +25,8 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
     }
   }
 
-  void _confirmPayment() {
+  void _confirmPayment() async{
+
     if (selectedPaymentMethod != null) {
       if (selectedPaymentMethod == 'PayPal') {
         Navigator.of(context).push(
@@ -56,7 +58,6 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
                         "currency": "USD",
                       },
                     ],
-
                   },
                 },
               ],
@@ -73,33 +74,32 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
               onError: (error) {
                 if (mounted) {
                   setState(() {
-                    // Handle successful payment
+                    // Handle payment error
                   });
                 }
                 print("onError: $error");
-                // Handle payment error
               },
               onCancel: (params) {
                 if (mounted) {
                   setState(() {
-                    // Handle successful payment
+                    // Handle payment cancellation
                   });
                 }
                 print('Cancelled: $params');
-                // Handle payment cancellation
               },
             ),
           ),
         );
+
       } else {
-        // Handle other payment methods
         print('Processing payment via $selectedPaymentMethod');
       }
     } else {
       print('Please select a payment method');
     }
+    final viewModel = ref.read(courseViewModelProvider.notifier);
+    await viewModel.createPayment(widget.course.id, widget.course.price.toInt(), "paypal", "successful");
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -108,19 +108,20 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Checkout'),
-        backgroundColor: Colors.indigo,
+        backgroundColor: Colors.indigo.shade700,
+        elevation: 0,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Course Banner Image
+            // Course Banner Image with Shadow
             Container(
               width: double.infinity,
-              height: 200,
+              height: 220,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(20),
                 image: DecorationImage(
                   image: NetworkImage(
                     "http://10.0.2.2:3000/thumbnails/${widget.course.thumbnail}",
@@ -129,9 +130,9 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 10,
-                    offset: Offset(0, 4),
+                    color: Colors.black45,
+                    blurRadius: 20,
+                    offset: Offset(0, 10),
                   ),
                 ],
               ),
@@ -160,7 +161,7 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
             ),
             const SizedBox(height: 24),
 
-            // Checkout Section
+            // Checkout Section with Summary
             _buildCheckoutSummary(),
 
             const SizedBox(height: 30),
@@ -182,22 +183,24 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
 
             const SizedBox(height: 30),
 
-            // Confirm Payment Button
+            // Confirm Payment Button with Elevated Style
             Center(
               child: ElevatedButton(
                 onPressed: _confirmPayment,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blueAccent,
+                  backgroundColor: Colors.blueAccent.shade700,
                   padding: const EdgeInsets.symmetric(horizontal: 90, vertical: 16),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18.0),
+                    borderRadius: BorderRadius.circular(25.0),
                   ),
-                  elevation: 6,
+                  shadowColor: Colors.blueAccent.shade700.withOpacity(0.3),
+                  elevation: 10,
                 ),
                 child: const Text(
                   'Confirm Payment',
                   style: TextStyle(
                     fontSize: 18,
+                    fontWeight: FontWeight.w600,
                     color: Colors.white,
                   ),
                 ),
@@ -209,7 +212,6 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
     );
   }
 
-  // Checkout summary widget
   Widget _buildCheckoutSummary() {
     return Container(
       padding: const EdgeInsets.all(20),
@@ -219,8 +221,8 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
         boxShadow: [
           BoxShadow(
             color: Colors.black12,
-            offset: const Offset(0, 4),
-            blurRadius: 8,
+            offset: const Offset(0, 10),
+            blurRadius: 15,
           ),
         ],
       ),
@@ -262,22 +264,21 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
     );
   }
 
-  // Payment method builder widget
   Widget _buildPaymentMethod(IconData icon, String method, String description, double screenWidth) {
     return Card(
-      elevation: 4,
+      elevation: 6,
       margin: EdgeInsets.symmetric(vertical: screenWidth * 0.02),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(screenWidth * 0.03),
       ),
       child: ListTile(
-        leading: Icon(icon, color: Colors.purple, size: screenWidth * 0.08),
+        leading: Icon(icon, color: Colors.deepPurpleAccent, size: screenWidth * 0.08),
         title: Text(
           method,
           style: TextStyle(
             fontSize: screenWidth * 0.045,
             fontWeight: FontWeight.bold,
-            color: Colors.purple,
+            color: Colors.deepPurpleAccent,
           ),
         ),
         subtitle: Text(
@@ -292,12 +293,16 @@ class _PaymentPageState extends ConsumerState<PaymentPage> {
             selectedPaymentMethod = method;
           });
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Selected: $method')),
+            SnackBar(
+              content: Text('Selected: $method'),
+              backgroundColor: Colors.deepPurpleAccent,
+              duration: const Duration(seconds: 2),
+            ),
           );
         },
-        tileColor: selectedPaymentMethod == method ? Colors.purple[50] : Colors.white,
+        tileColor: selectedPaymentMethod == method ? Colors.deepPurple[50] : Colors.white,
         shape: RoundedRectangleBorder(
-          side: BorderSide(color: selectedPaymentMethod == method ? Colors.purple : Colors.transparent, width: 2),
+          side: BorderSide(color: selectedPaymentMethod == method ? Colors.deepPurpleAccent : Colors.transparent, width: 2),
           borderRadius: BorderRadius.circular(screenWidth * 0.03),
         ),
       ),

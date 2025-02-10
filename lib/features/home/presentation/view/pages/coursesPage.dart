@@ -75,21 +75,21 @@ class _CoursesPageState extends ConsumerState<CoursesPage> {
     final isTablet = MediaQuery.of(context).size.width > 600;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Courses',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
-        ),
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.blue, Colors.blueAccent],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-        ),
-      ),
+      // appBar: AppBar(
+      //   title: const Text(
+      //     'Courses',
+      //     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+      //   ),
+      //   flexibleSpace: Container(
+      //     decoration: BoxDecoration(
+      //       gradient: LinearGradient(
+      //         colors: [Colors.blue, Colors.blueAccent],
+      //         begin: Alignment.topLeft,
+      //         end: Alignment.bottomRight,
+      //       ),
+      //     ),
+      //   ),
+      // ),
       body: RefreshIndicator(
         onRefresh: _refreshCourses,
         child: Padding(
